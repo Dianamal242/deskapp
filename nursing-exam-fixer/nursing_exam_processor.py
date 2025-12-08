@@ -1233,22 +1233,23 @@ def sheet_work_submenu(processor: NursingExamProcessor, sheet_name: str):
     print(f"{'='*70}")
 
     while True:
-        print(f"\n┌{'─'*50}┐")
-        print(f"│ 📌 גיליון: {sheet_name:<38}│")
-        print(f"├{'─'*50}┤")
-        print(f"│ 1. 🔤 תקן ניסוחים רק בשאלות                     │")
-        print(f"│ 2. 📝 תקן פורמט רק בתשובות                       │")
-        print(f"│ 3. ✨ תקן גם שאלות וגם תשובות                    │")
-        print(f"│ 4. 👀 הצג שאלות (לפי טווח)                       │")
-        print(f"│ 5. 💡 הצע מסיחים חסרים                           │")
-        print(f"│ 6. ✅ העבר שאלות תקינות לגיליון נפרד             │")
-        print(f"│ 7. 🔍 חפש שאלות כפולות בגיליון זה                │")
-        print(f"│ 8. 🏷️  זהה חטיבות שגויות בגיליון זה              │")
-        print(f"│ 9. 📊 הצג סטטיסטיקות גיליון                      │")
-        print(f"│ 0. ⬅️  חזור לתפריט הראשי                         │")
-        print(f"└{'─'*50}┘")
+        print(f"\n┌{'─'*52}┐")
+        print(f"│ 📌 גיליון: {sheet_name:<40}│")
+        print(f"├{'─'*52}┤")
+        print(f"│ 1. 🔤 תקן ניסוחים רק בשאלות                       │")
+        print(f"│ 2. 📝 תקן פורמט רק בתשובות                         │")
+        print(f"│ 3. ✨ תקן גם שאלות וגם תשובות                      │")
+        print(f"│ 4. 👀 הצג שאלות (לפי טווח)                         │")
+        print(f"│ 5. 💡 הצע מסיחים חסרים                             │")
+        print(f"│ 6. ✅ העבר שאלות תקינות לגיליון נפרד               │")
+        print(f"│ 7. 🔍 חפש ומחק שאלות כפולות                        │")
+        print(f"│ 8. 🏷️  זהה חטיבות שגויות בגיליון זה                │")
+        print(f"│ 9. 📊 הצג סטטיסטיקות גיליון                        │")
+        print(f"│ 10. 🗑️  מחק שאלות לפי מספר שורה                    │")
+        print(f"│ 0. ⬅️  חזור לתפריט הראשי                           │")
+        print(f"└{'─'*52}┘")
 
-        sub_choice = input("בחר אפשרות (0-9): ").strip()
+        sub_choice = input("בחר אפשרות (0-10): ").strip()
 
         if sub_choice == '1':
             # תיקון שאלות בלבד
@@ -1338,18 +1339,73 @@ def sheet_work_submenu(processor: NursingExamProcessor, sheet_name: str):
             df = processor.df_dict[sheet_name]
 
         elif sub_choice == '7':
-            # חיפוש כפילויות בגיליון
+            # חיפוש כפילויות בגיליון עם אפשרות מחיקה
             df = processor.df_dict[sheet_name]
             print(f"\n🔍 מחפש כפילויות בגיליון '{sheet_name}'...")
             duplicates = processor.find_duplicates(df)
 
             if duplicates:
                 print(f"\n⚠️ נמצאו {len(duplicates)} כפילויות:\n")
-                for dup in duplicates[:20]:
-                    print(f"  📄 שורה {dup['original']['row']} כפולה לשורה {dup['duplicate']['row']}")
-                    print(f"     סוג: {dup['similarity']}")
-                    print(f"     שאלה: \"{dup['original']['question'][:50]}...\"")
-                    print()
+
+                # הצגת כל הכפילויות בטבלה
+                print("┌─────┬────────────┬────────────┬──────────────────────────────────────────┐")
+                print("│  #  │  מקורית   │   כפולה   │                 שאלה                     │")
+                print("├─────┼────────────┼────────────┼──────────────────────────────────────────┤")
+
+                for i, dup in enumerate(duplicates, 1):
+                    q_short = dup['original']['question'][:35] + '...' if len(dup['original']['question']) > 35 else dup['original']['question']
+                    print(f"│ {i:3} │ שורה {dup['original']['row']:<4} │ שורה {dup['duplicate']['row']:<4} │ {q_short:<40} │")
+
+                print("└─────┴────────────┴────────────┴──────────────────────────────────────────┘")
+
+                # שאלה על מחיקה
+                print("\n🗑️  אפשרויות מחיקה:")
+                print("   1. מחק את כל הכפולות (שמור את המקוריות)")
+                print("   2. בחר ידנית אילו למחוק")
+                print("   3. אל תמחק כלום (רק הצגה)")
+
+                delete_choice = input("\nבחר אפשרות (1/2/3): ").strip()
+
+                if delete_choice == '1':
+                    # מחיקת כל הכפולות
+                    rows_to_delete = [dup['duplicate']['row'] - 2 for dup in duplicates]  # -2 כי Excel שורה 2 = index 0
+                    confirm = input(f"\n⚠️  האם למחוק {len(rows_to_delete)} שאלות כפולות? (כן/לא): ").strip()
+
+                    if confirm.lower() in ['כן', 'yes', 'y', 'כ']:
+                        df = processor.df_dict[sheet_name]
+                        df = df.drop(index=[i for i in rows_to_delete if i in df.index])
+                        df = df.reset_index(drop=True)
+                        processor.df_dict[sheet_name] = df
+                        print(f"\n✅ נמחקו {len(rows_to_delete)} שאלות כפולות!")
+                        print(f"   נותרו {len(df)} שאלות בגיליון")
+                    else:
+                        print("\n❌ המחיקה בוטלה")
+
+                elif delete_choice == '2':
+                    # מחיקה ידנית
+                    print("\n📝 הקלד מספרי שורות למחיקה (מופרדים בפסיק):")
+                    print("   לדוגמה: 5,12,18")
+                    rows_input = input("שורות למחיקה: ").strip()
+
+                    if rows_input:
+                        try:
+                            rows_to_delete = [int(r.strip()) - 2 for r in rows_input.split(',')]
+                            confirm = input(f"\n⚠️  האם למחוק {len(rows_to_delete)} שאלות? (כן/לא): ").strip()
+
+                            if confirm.lower() in ['כן', 'yes', 'y', 'כ']:
+                                df = processor.df_dict[sheet_name]
+                                valid_rows = [i for i in rows_to_delete if i in df.index]
+                                df = df.drop(index=valid_rows)
+                                df = df.reset_index(drop=True)
+                                processor.df_dict[sheet_name] = df
+                                print(f"\n✅ נמחקו {len(valid_rows)} שאלות!")
+                                print(f"   נותרו {len(df)} שאלות בגיליון")
+                            else:
+                                print("\n❌ המחיקה בוטלה")
+                        except ValueError:
+                            print("❌ קלט לא תקין")
+                else:
+                    print("\n📋 הכפילויות הוצגו ללא מחיקה")
             else:
                 print("\n✅ לא נמצאו כפילויות בגיליון זה!")
 
@@ -1424,6 +1480,102 @@ def sheet_work_submenu(processor: NursingExamProcessor, sheet_name: str):
                 print(f"\n  שאלות עם 4 מסיחים: {full_answers} ({full_answers/len(df)*100:.1f}%)")
 
             print("─" * 50)
+
+        elif sub_choice == '10':
+            # מחיקת שאלות ידנית
+            df = processor.df_dict[sheet_name]
+            print(f"\n🗑️  מחיקת שאלות מגיליון '{sheet_name}'")
+            print(f"   סה\"כ שאלות בגיליון: {len(df)}")
+            print("-" * 50)
+
+            print("\n📋 אפשרויות מחיקה:")
+            print("   1. מחק לפי מספרי שורות (לדוגמה: 5,12,18)")
+            print("   2. מחק טווח שורות (לדוגמה: 10-20)")
+            print("   3. הצג שאלה לפני מחיקה")
+
+            delete_option = input("\nבחר אפשרות (1/2/3): ").strip()
+
+            if delete_option == '1':
+                # מחיקה לפי רשימה
+                rows_input = input("הקלד מספרי שורות למחיקה (מופרדים בפסיק): ").strip()
+                if rows_input:
+                    try:
+                        rows_to_delete = [int(r.strip()) - 2 for r in rows_input.split(',')]
+
+                        # הצגת השאלות שיימחקו
+                        print("\n📋 שאלות שיימחקו:")
+                        for row_idx in rows_to_delete:
+                            if row_idx in df.index:
+                                q = str(df.iloc[row_idx].get('שאלה', ''))[:50]
+                                print(f"   שורה {row_idx + 2}: {q}...")
+
+                        confirm = input(f"\n⚠️  האם למחוק {len(rows_to_delete)} שאלות? (כן/לא): ").strip()
+
+                        if confirm.lower() in ['כן', 'yes', 'y', 'כ']:
+                            valid_rows = [i for i in rows_to_delete if i in df.index]
+                            df = df.drop(index=valid_rows)
+                            df = df.reset_index(drop=True)
+                            processor.df_dict[sheet_name] = df
+                            print(f"\n✅ נמחקו {len(valid_rows)} שאלות!")
+                            print(f"   נותרו {len(df)} שאלות בגיליון")
+                        else:
+                            print("\n❌ המחיקה בוטלה")
+                    except ValueError:
+                        print("❌ קלט לא תקין")
+
+            elif delete_option == '2':
+                # מחיקת טווח
+                range_input = input("הקלד טווח שורות (לדוגמה: 10-20): ").strip()
+                if '-' in range_input:
+                    try:
+                        start, end = map(int, range_input.split('-'))
+                        rows_to_delete = list(range(start - 2, end - 1))  # -2 להמרה לאינדקס
+
+                        confirm = input(f"\n⚠️  האם למחוק שורות {start} עד {end} ({len(rows_to_delete)} שאלות)? (כן/לא): ").strip()
+
+                        if confirm.lower() in ['כן', 'yes', 'y', 'כ']:
+                            valid_rows = [i for i in rows_to_delete if i in df.index]
+                            df = df.drop(index=valid_rows)
+                            df = df.reset_index(drop=True)
+                            processor.df_dict[sheet_name] = df
+                            print(f"\n✅ נמחקו {len(valid_rows)} שאלות!")
+                            print(f"   נותרו {len(df)} שאלות בגיליון")
+                        else:
+                            print("\n❌ המחיקה בוטלה")
+                    except ValueError:
+                        print("❌ קלט לא תקין")
+
+            elif delete_option == '3':
+                # הצגה לפני מחיקה
+                row_num = input("הקלד מספר שורה לצפייה: ").strip()
+                try:
+                    row_idx = int(row_num) - 2
+                    if row_idx in df.index:
+                        row = df.iloc[row_idx]
+                        print(f"\n┌{'─'*68}┐")
+                        print(f"│ שורה {row_num} │ חטיבה: {row.get('חטיבה', 'לא מוגדר'):<20}")
+                        print(f"├{'─'*68}┤")
+                        print(f"│ שאלה: {str(row.get('שאלה', ''))[:60]}")
+                        print(f"├{'─'*68}┤")
+                        print(f"│ א. {str(row.get('א', ''))[:50]}")
+                        print(f"│ ב. {str(row.get('ב', ''))[:50]}")
+                        print(f"│ ג. {str(row.get('ג', ''))[:50]}")
+                        print(f"│ ד. {str(row.get('ד', ''))[:50]}")
+                        print(f"└{'─'*68}┘")
+
+                        delete_confirm = input("\n🗑️  למחוק שאלה זו? (כן/לא): ").strip()
+                        if delete_confirm.lower() in ['כן', 'yes', 'y', 'כ']:
+                            df = df.drop(index=row_idx)
+                            df = df.reset_index(drop=True)
+                            processor.df_dict[sheet_name] = df
+                            print(f"\n✅ השאלה נמחקה!")
+                            print(f"   נותרו {len(df)} שאלות בגיליון")
+                        else:
+                            print("\n❌ המחיקה בוטלה")
+                    else:
+                        print("❌ מספר שורה לא תקין")
+                except ValueError:
+                    print("❌ קלט לא תקין")
 
         elif sub_choice == '0':
             # חזרה לתפריט הראשי
