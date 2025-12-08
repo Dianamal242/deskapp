@@ -1223,6 +1223,217 @@ def interactive_menu():
 """)
 
 
+def sheet_work_submenu(processor: NursingExamProcessor, sheet_name: str):
+    """תת-תפריט לעבודה מתמשכת על גיליון ספציפי"""
+    df = processor.df_dict[sheet_name]
+
+    print(f"\n{'='*70}")
+    print(f"📋 עבודה על גיליון: {sheet_name}")
+    print(f"   סה\"כ שאלות: {len(df)}")
+    print(f"{'='*70}")
+
+    while True:
+        print(f"\n┌{'─'*50}┐")
+        print(f"│ 📌 גיליון: {sheet_name:<38}│")
+        print(f"├{'─'*50}┤")
+        print(f"│ 1. 🔤 תקן ניסוחים רק בשאלות                     │")
+        print(f"│ 2. 📝 תקן פורמט רק בתשובות                       │")
+        print(f"│ 3. ✨ תקן גם שאלות וגם תשובות                    │")
+        print(f"│ 4. 👀 הצג שאלות (לפי טווח)                       │")
+        print(f"│ 5. 💡 הצע מסיחים חסרים                           │")
+        print(f"│ 6. ✅ העבר שאלות תקינות לגיליון נפרד             │")
+        print(f"│ 7. 🔍 חפש שאלות כפולות בגיליון זה                │")
+        print(f"│ 8. 🏷️  זהה חטיבות שגויות בגיליון זה              │")
+        print(f"│ 9. 📊 הצג סטטיסטיקות גיליון                      │")
+        print(f"│ 0. ⬅️  חזור לתפריט הראשי                         │")
+        print(f"└{'─'*50}┘")
+
+        sub_choice = input("בחר אפשרות (0-9): ").strip()
+
+        if sub_choice == '1':
+            # תיקון שאלות בלבד
+            print(f"\n🔤 מתקן ניסוחים בשאלות בגיליון '{sheet_name}'...")
+            processor.process_sheet(sheet_name, fix_punctuation=True, fix_answers=False)
+            print("✅ תיקון שאלות הושלם!")
+
+        elif sub_choice == '2':
+            # תיקון תשובות בלבד
+            print(f"\n📝 מתקן פורמט תשובות בגיליון '{sheet_name}'...")
+            processor.process_sheet(sheet_name, fix_punctuation=False, fix_answers=True)
+            print("✅ תיקון תשובות הושלם!")
+
+        elif sub_choice == '3':
+            # תיקון שאלות ותשובות
+            print(f"\n✨ מתקן שאלות ותשובות בגיליון '{sheet_name}'...")
+            processor.process_sheet(sheet_name, fix_punctuation=True, fix_answers=True)
+            print("✅ תיקון שאלות ותשובות הושלם!")
+
+        elif sub_choice == '4':
+            # הצגת שאלות לפי טווח
+            df = processor.df_dict[sheet_name]
+            print(f"\n📋 גיליון '{sheet_name}' מכיל {len(df)} שאלות")
+
+            try:
+                start = int(input("מאיזו שאלה להתחיל (ברירת מחדל: 1): ").strip() or "1") - 1
+                count = int(input("כמה שאלות להציג (ברירת מחדל: 10): ").strip() or "10")
+
+                start = max(0, start)
+                display_questions_for_approval(df, start, count)
+
+                # אפשרות לדפדף
+                while True:
+                    nav = input("\n[Enter=הבא] [p=קודם] [מספר=קפוץ לשאלה] [q=חזור]: ").strip().lower()
+                    if nav == '' or nav == 'n':
+                        start += count
+                        if start >= len(df):
+                            print("📄 הגעת לסוף הגיליון")
+                            break
+                        display_questions_for_approval(df, start, count)
+                    elif nav == 'p':
+                        start = max(0, start - count)
+                        display_questions_for_approval(df, start, count)
+                    elif nav == 'q':
+                        break
+                    elif nav.isdigit():
+                        start = int(nav) - 1
+                        start = max(0, min(start, len(df) - 1))
+                        display_questions_for_approval(df, start, count)
+            except ValueError:
+                print("❌ קלט לא תקין")
+
+        elif sub_choice == '5':
+            # הצעת מסיחים חסרים
+            df = processor.df_dict[sheet_name]
+            print(f"\n💡 מחפש שאלות עם מסיחים חסרים בגיליון '{sheet_name}'...")
+
+            suggestions_found = 0
+            for idx, row in df.iterrows():
+                suggestions = processor.suggest_distractors(row)
+                if suggestions:
+                    suggestions_found += 1
+                    print(f"\n  שורה {idx + 2}: \"{str(row.get('שאלה', ''))[:50]}...\"")
+                    print(f"  מסיחים מוצעים:")
+                    for s in suggestions:
+                        print(f"    • {s}")
+
+                    if suggestions_found >= 10:
+                        more = input("\n  להציג עוד? (Enter להמשיך, 'לא' לעצור): ").strip()
+                        if more.lower() in ['לא', 'no', 'n']:
+                            break
+
+            if suggestions_found == 0:
+                print("\n✅ כל השאלות מכילות 4 מסיחים!")
+            else:
+                print(f"\n📊 סה\"כ: {suggestions_found} שאלות עם מסיחים חסרים")
+
+        elif sub_choice == '6':
+            # העברת שאלות תקינות
+            print(f"\n🔄 מעביר שאלות תקינות מגיליון '{sheet_name}'...")
+            results = processor.transfer_valid_questions(sheet_name)
+            print(f"\n✅ הושלם!")
+            print(f"   • הועברו: {results['transferred']} שאלות")
+            print(f"   • נשארו: {results['remained']} שאלות")
+
+            # עדכון ה-df המקומי
+            df = processor.df_dict[sheet_name]
+
+        elif sub_choice == '7':
+            # חיפוש כפילויות בגיליון
+            df = processor.df_dict[sheet_name]
+            print(f"\n🔍 מחפש כפילויות בגיליון '{sheet_name}'...")
+            duplicates = processor.find_duplicates(df)
+
+            if duplicates:
+                print(f"\n⚠️ נמצאו {len(duplicates)} כפילויות:\n")
+                for dup in duplicates[:20]:
+                    print(f"  📄 שורה {dup['original']['row']} כפולה לשורה {dup['duplicate']['row']}")
+                    print(f"     סוג: {dup['similarity']}")
+                    print(f"     שאלה: \"{dup['original']['question'][:50]}...\"")
+                    print()
+            else:
+                print("\n✅ לא נמצאו כפילויות בגיליון זה!")
+
+        elif sub_choice == '8':
+            # זיהוי חטיבות שגויות בגיליון
+            df = processor.df_dict[sheet_name]
+            print(f"\n🏷️  מזהה חטיבות שגויות בגיליון '{sheet_name}'...")
+
+            misplaced = []
+            for idx, row in df.iterrows():
+                current_hativa = str(row.get('חטיבה', '')) if pd.notna(row.get('חטיבה')) else ''
+                question = str(row.get('שאלה', '')) if pd.notna(row.get('שאלה')) else ''
+
+                detected_hativa, confidence = processor.detect_hativa(question, current_hativa)
+
+                if detected_hativa and detected_hativa != current_hativa and confidence >= 0.5:
+                    misplaced.append({
+                        'row': idx + 2,
+                        'question': question[:60] + '...' if len(question) > 60 else question,
+                        'current_hativa': current_hativa,
+                        'suggested_hativa': detected_hativa,
+                        'confidence': f'{confidence*100:.0f}%'
+                    })
+
+            if misplaced:
+                print(f"\n⚠️ נמצאו {len(misplaced)} שאלות בחטיבה לא נכונה:\n")
+                for item in misplaced[:20]:
+                    print(f"  📄 שורה {item['row']}")
+                    print(f"     חטיבה נוכחית: {item['current_hativa']}")
+                    print(f"     חטיבה מוצעת: {item['suggested_hativa']} ({item['confidence']})")
+                    print(f"     שאלה: \"{item['question']}\"")
+                    print()
+            else:
+                print("\n✅ כל השאלות בחטיבה הנכונה!")
+
+        elif sub_choice == '9':
+            # סטטיסטיקות גיליון
+            df = processor.df_dict[sheet_name]
+            print(f"\n📊 סטטיסטיקות גיליון '{sheet_name}':")
+            print("─" * 50)
+            print(f"  סה\"כ שאלות: {len(df)}")
+
+            # חלוקה לפי חטיבה
+            if 'חטיבה' in df.columns:
+                print("\n  חלוקה לפי חטיבה:")
+                hativa_counts = df['חטיבה'].value_counts()
+                for hativa, count in hativa_counts.items():
+                    pct = count / len(df) * 100
+                    print(f"    • {hativa}: {count} ({pct:.1f}%)")
+
+            # בדיקת איכות
+            issues = processor.identify_issues(df)
+            print(f"\n  שאלות עם בעיות: {len(issues)}")
+
+            # חלוקה לפי קטגוריה
+            by_category = {}
+            for issue in issues:
+                cat = issue['category']
+                by_category[cat] = by_category.get(cat, 0) + 1
+
+            if by_category:
+                print("  חלוקה לפי סוג בעיה:")
+                for cat, count in sorted(by_category.items()):
+                    print(f"    • {cat}: {count}")
+
+            # מסיחים
+            answer_cols = ['א', 'ב', 'ג', 'ד']
+            existing_cols = [c for c in answer_cols if c in df.columns]
+            if existing_cols:
+                full_answers = sum(1 for _, row in df.iterrows()
+                                 if all(pd.notna(row.get(c)) and str(row.get(c)).strip() for c in existing_cols))
+                print(f"\n  שאלות עם 4 מסיחים: {full_answers} ({full_answers/len(df)*100:.1f}%)")
+
+            print("─" * 50)
+
+        elif sub_choice == '0':
+            # חזרה לתפריט הראשי
+            print(f"\n⬅️  חוזר לתפריט הראשי...")
+            break
+
+        else:
+            print("❌ בחירה לא תקינה. נסה שוב.")
+
+
 def main():
     """פונקציה ראשית"""
     print("""
@@ -1285,7 +1496,7 @@ def main():
             print("\n✅ כל הגיליונות עובדו!")
 
         elif choice == '2':
-            # עיבוד גיליון ספציפי
+            # עיבוד גיליון ספציפי - עם תת-תפריט לעבודה מתמשכת
             print("\nגיליונות זמינים:")
             for i, name in enumerate(processor.df_dict.keys(), 1):
                 print(f"  {i}. {name}")
@@ -1294,7 +1505,9 @@ def main():
             try:
                 sheet_idx = int(sheet_choice) - 1
                 sheet_name = list(processor.df_dict.keys())[sheet_idx]
-                processor.process_sheet(sheet_name)
+
+                # כניסה לתת-תפריט עבודה על גיליון
+                sheet_work_submenu(processor, sheet_name)
             except (ValueError, IndexError):
                 print("❌ בחירה לא תקינה")
 
