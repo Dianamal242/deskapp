@@ -2,3 +2,11 @@
 /node_modules/
 .sass-cache/
 .npmignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
