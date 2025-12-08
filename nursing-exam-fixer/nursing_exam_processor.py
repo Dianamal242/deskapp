@@ -447,51 +447,6 @@ class NursingExamProcessor:
 
         return answer
 
-    def calculate_quality_score(self, row: pd.Series) -> Tuple[int, List[str]]:
-        """מחשב ציון איכות לשאלה"""
-        score = 100
-        issues = []
-
-        question = str(row.get('שאלה', '')) if pd.notna(row.get('שאלה')) else ''
-
-        # -20: חסר סימן שאלה
-        if question and not question.strip().endswith('?'):
-            score -= 20
-            issues.append('חסר ?')
-
-        # -15 לכל מסיח חסר
-        answer_cols = ['א', 'ב', 'ג', 'ד']
-        for col in answer_cols:
-            if col not in row.index or pd.isna(row.get(col)) or not str(row.get(col, '')).strip():
-                score -= 15
-                issues.append(f'חסר {col}')
-
-        # -10: שאלה קצרה מדי
-        if len(question) < 20:
-            score -= 10
-            issues.append('שאלה קצרה')
-
-        # -10: חסר חטיבה
-        if 'חטיבה' in row.index and (pd.isna(row.get('חטיבה')) or not row.get('חטיבה')):
-            score -= 10
-            issues.append('חסר חטיבה')
-
-        # -5: הערות נבחנים
-        if re.search(ISSUE_PATTERNS['student_notes'], question, re.IGNORECASE):
-            score -= 15
-            issues.append('הערות נבחנים')
-
-        # -10: כפילות במסיחים
-        answers = []
-        for col in answer_cols:
-            if col in row.index and pd.notna(row.get(col)):
-                answers.append(str(row[col]).lower().strip())
-        if len(answers) != len(set(answers)):
-            score -= 10
-            issues.append('כפילות')
-
-        return max(0, score), issues
-
     def process_sheet(self, sheet_name: str, fix_punctuation: bool = True,
                      fix_answers: bool = True, interactive: bool = True) -> pd.DataFrame:
         """מעבד גיליון שלם"""
@@ -572,27 +527,6 @@ class NursingExamProcessor:
                                 answer_fixes += 1
 
             print(f"   ✅ תוקנו {answer_fixes} תשובות")
-
-        # חישוב ציוני איכות
-        print("\n📊 מחשב ציוני איכות...")
-        scores = []
-        all_issues = []
-
-        for idx, row in df.iterrows():
-            score, issues_list = self.calculate_quality_score(row)
-            scores.append(score)
-            all_issues.append(', '.join(issues_list) if issues_list else '✅')
-
-        df['ציון איכות'] = scores
-        df['בעיות'] = all_issues
-
-        avg_score = sum(scores) / len(scores) if scores else 0
-        perfect = sum(1 for s in scores if s == 100)
-        critical = sum(1 for s in scores if s < 50)
-
-        print(f"   • ממוצע: {avg_score:.1f}/100")
-        print(f"   • שאלות מושלמות (100): {perfect}")
-        print(f"   • שאלות קריטיות (<50): {critical}")
 
         self.df_dict[sheet_name] = df
         return df
@@ -1046,9 +980,6 @@ class NursingExamProcessor:
         report.append("### מצב הקובץ:")
         for sheet_name, df in self.df_dict.items():
             report.append(f"- {sheet_name}: {len(df)} שאלות")
-            if 'ציון איכות' in df.columns:
-                avg = df['ציון איכות'].mean()
-                report.append(f"  • ציון איכות ממוצע: {avg:.1f}/100")
 
         report.append("")
         report.append(f"📁 קובץ פלט: {self.output_path}")
@@ -1070,7 +1001,7 @@ def display_questions_for_approval(df: pd.DataFrame, start: int = 0, count: int 
         row_num = idx + 2  # +2 for Excel row number
 
         print(f"┌{'─'*68}┐")
-        print(f"│ #{row_num} │ {row.get('חטיבה', 'לא מוגדר'):<20} │ ציון: {row.get('ציון איכות', '?')}")
+        print(f"│ #{row_num} │ {row.get('חטיבה', 'לא מוגדר'):<20}")
         print(f"├{'─'*68}┤")
         print(f"│ שאלה: {str(row.get('שאלה', ''))[:60]}")
         print(f"├{'─'*68}┤")
@@ -1078,10 +1009,6 @@ def display_questions_for_approval(df: pd.DataFrame, start: int = 0, count: int 
         print(f"│ ב. {str(row.get('ב', ''))[:50]}")
         print(f"│ ג. {str(row.get('ג', ''))[:50]}")
         print(f"│ ד. {str(row.get('ד', ''))[:50]}")
-
-        if row.get('בעיות') and row.get('בעיות') != '✅':
-            print(f"├{'─'*68}┤")
-            print(f"│ ⚠️ בעיות: {row.get('בעיות', '')}")
 
         print(f"└{'─'*68}┘\n")
 
