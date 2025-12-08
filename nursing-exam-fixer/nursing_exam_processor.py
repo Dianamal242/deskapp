@@ -43,30 +43,44 @@ HATIVA_ORDER = [
 ]
 
 # מקורות רשמיים - ספרי לימוד לכל חטיבה
+# נתיבים מלאים לספרים על ה-Mac
 OFFICIAL_SOURCES = {
     'סיעוד הנפש': {
         'name': 'Psychiatric Mental Health Nursing',
-        'file': 'Psychiatric Mental Health Nursing.pdf'
+        'paths': [
+            '/Users/dianamalkieli/Library/Mobile Documents/com~apple~CloudDocs/Psychiatric Mental Health Nursing.pdf'
+        ]
     },
     'סיעוד האישה': {
         'name': "Olds' Maternal-Newborn Nursing 12th Edition",
-        'file': 'Olds 12.pdf'
+        'paths': [
+            '/Users/dianamalkieli/Library/Mobile Documents/com~apple~CloudDocs/COMPANY- STARTUP/ספרים וחומרים/Olds 12 .pdf'
+        ]
     },
     'סיעוד המבוגר': {
-        'name': 'Ignatavicius 11th + Kozier & Erb\'s Fundamentals',
-        'files': ['Ignatavicius 11.pdf', 'Kozier.pdf']
+        'name': 'Ignatavicius 11th + Kozier',
+        'paths': [
+            '/Users/dianamalkieli/Library/Mobile Documents/com~apple~CloudDocs/COMPANY- STARTUP/Ignatavicius 11 A (1)_compressed.pdf',
+            '/Users/dianamalkieli/Library/Mobile Documents/com~apple~CloudDocs/COMPANY- STARTUP/ספרים וחומרים/Kozier .pdf'
+        ]
     },
     'פדיאטריה': {
         'name': "Wong's Nursing Care of Infants and Children 12th",
-        'file': "Wong's Nursing Care 12th.pdf"
+        'paths': [
+            "/Users/dianamalkieli/Library/Mobile Documents/com~apple~CloudDocs/COMPANY- STARTUP/פרוגנוזה/ספרים/Wong's Nursing Care of Infants and Children 12th.pdf"
+        ]
     },
     'פרמקולוגיה': {
         'name': 'Nursing Drug Handbook 2025-2026',
-        'file': 'Nursing Drug Handbook 2025-2026.pdf'
+        'paths': [
+            '/Users/dianamalkieli/Library/Mobile Documents/comappleCloudDocs/COMPANY- STARTUP/ספרים וחומרים/Nursing Drug Handbook 2025-2026.pdf'
+        ]
     },
     'רפואת חירום': {
         'name': 'Emergency Nursing (from Ignatavicius)',
-        'file': 'Ignatavicius 11.pdf'
+        'paths': [
+            '/Users/dianamalkieli/Library/Mobile Documents/com~apple~CloudDocs/COMPANY- STARTUP/Ignatavicius 11 A (1)_compressed.pdf'
+        ]
     },
 }
 
