@@ -42,13 +42,32 @@ HATIVA_ORDER = [
     'רפואת חירום'
 ]
 
-# מקורות רשמיים
+# מקורות רשמיים - ספרי לימוד לכל חטיבה
 OFFICIAL_SOURCES = {
-    'סיעוד הנפש': 'Psychiatric Mental Health Nursing',
-    'סיעוד האישה': "Olds' Maternal-Newborn Nursing 12th",
-    'סיעוד המבוגר': 'Ignatavicius 11th + Kozier',
-    'פדיאטריה': "Wong's Nursing Care 12th",
-    'פרמקולוגיה': 'Nursing Drug Handbook 2025-2026',
+    'סיעוד הנפש': {
+        'name': 'Psychiatric Mental Health Nursing',
+        'file': 'Psychiatric Mental Health Nursing.pdf'
+    },
+    'סיעוד האישה': {
+        'name': "Olds' Maternal-Newborn Nursing 12th Edition",
+        'file': 'Olds 12.pdf'
+    },
+    'סיעוד המבוגר': {
+        'name': 'Ignatavicius 11th + Kozier & Erb\'s Fundamentals',
+        'files': ['Ignatavicius 11.pdf', 'Kozier.pdf']
+    },
+    'פדיאטריה': {
+        'name': "Wong's Nursing Care of Infants and Children 12th",
+        'file': "Wong's Nursing Care 12th.pdf"
+    },
+    'פרמקולוגיה': {
+        'name': 'Nursing Drug Handbook 2025-2026',
+        'file': 'Nursing Drug Handbook 2025-2026.pdf'
+    },
+    'רפואת חירום': {
+        'name': 'Emergency Nursing (from Ignatavicius)',
+        'file': 'Ignatavicius 11.pdf'
+    },
 }
 
 # מונחים מוכרים שלא לתרגם
