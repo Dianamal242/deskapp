@@ -18,6 +18,14 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 import json
 
+# PDF extraction
+try:
+    import fitz  # PyMuPDF
+    PDF_SUPPORT = True
+except ImportError:
+    PDF_SUPPORT = False
+    print("⚠️ PyMuPDF לא מותקן. להתקנה: pip3 install PyMuPDF")
+
 # =============================================
 # הגדרות צבעים לפי חטיבה
 # =============================================
@@ -869,6 +877,150 @@ class NursingExamProcessor:
 
         return misplaced
 
+    def search_in_books(self, question: str, hativa: str = None, max_results: int = 3) -> List[Dict]:
+        """
+        מחפש תוכן רלוונטי בספרי הלימוד לפי שאלה
+        """
+        if not PDF_SUPPORT:
+            return [{'error': 'PyMuPDF לא מותקן. להתקנה: pip3 install PyMuPDF'}]
+
+        results = []
+
+        # חילוץ מילות מפתח מהשאלה
+        keywords = self._extract_keywords(question)
+        if not keywords:
+            return [{'error': 'לא נמצאו מילות מפתח בשאלה'}]
+
+        # בחירת ספרים לחיפוש לפי חטיבה
+        if hativa and hativa in OFFICIAL_SOURCES:
+            sources_to_search = {hativa: OFFICIAL_SOURCES[hativa]}
+        else:
+            sources_to_search = OFFICIAL_SOURCES
+
+        for hativa_name, source_info in sources_to_search.items():
+            paths = source_info.get('paths', [])
+            book_name = source_info.get('name', hativa_name)
+
+            for pdf_path in paths:
+                if not os.path.exists(pdf_path):
+                    continue
+
+                try:
+                    matches = self._search_pdf(pdf_path, keywords, max_results=max_results)
+                    for match in matches:
+                        results.append({
+                            'hativa': hativa_name,
+                            'book': book_name,
+                            'page': match['page'],
+                            'text': match['text'],
+                            'keywords_found': match['keywords_found']
+                        })
+                except Exception as e:
+                    results.append({
+                        'error': f'שגיאה בקריאת {book_name}: {str(e)}'
+                    })
+
+        # מיון לפי מספר מילות מפתח שנמצאו
+        results.sort(key=lambda x: len(x.get('keywords_found', [])), reverse=True)
+
+        return results[:max_results * 2]  # מחזיר עד כפול מ-max_results
+
+    def _extract_keywords(self, text: str) -> List[str]:
+        """מחלץ מילות מפתח משאלה"""
+        if not text:
+            return []
+
+        # הסרת מילים נפוצות
+        stop_words = [
+            'מה', 'מי', 'איך', 'למה', 'מדוע', 'האם', 'כמה', 'מתי', 'איפה',
+            'של', 'על', 'את', 'עם', 'אל', 'מן', 'לא', 'כן', 'או', 'גם',
+            'הוא', 'היא', 'הם', 'הן', 'זה', 'זו', 'אלה', 'כל', 'כאשר',
+            'יש', 'אין', 'צריך', 'יכול', 'ניתן', 'חייב', 'אפשר',
+            'the', 'is', 'are', 'a', 'an', 'of', 'in', 'to', 'for', 'and', 'or'
+        ]
+
+        # חילוץ מילים משמעותיות
+        words = re.findall(r'\b[\w]{3,}\b', text)
+        keywords = [w for w in words if w.lower() not in stop_words]
+
+        # הוספת מונחים רפואיים אם מופיעים
+        medical_terms = []
+        for term in MEDICAL_TRANSLATIONS.keys():
+            if term.lower() in text.lower():
+                medical_terms.append(term)
+
+        return list(set(keywords + medical_terms))[:10]  # עד 10 מילות מפתח
+
+    def _search_pdf(self, pdf_path: str, keywords: List[str], max_results: int = 3) -> List[Dict]:
+        """מחפש בקובץ PDF"""
+        if not PDF_SUPPORT:
+            return []
+
+        results = []
+
+        try:
+            doc = fitz.open(pdf_path)
+
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                text = page.get_text()
+
+                # בדיקה כמה מילות מפתח נמצאות בעמוד
+                found_keywords = []
+                for kw in keywords:
+                    if kw.lower() in text.lower():
+                        found_keywords.append(kw)
+
+                if len(found_keywords) >= 2:  # צריך לפחות 2 מילות מפתח
+                    # חילוץ קטע רלוונטי
+                    excerpt = self._extract_relevant_excerpt(text, found_keywords)
+
+                    results.append({
+                        'page': page_num + 1,
+                        'text': excerpt,
+                        'keywords_found': found_keywords
+                    })
+
+                if len(results) >= max_results:
+                    break
+
+            doc.close()
+
+        except Exception as e:
+            print(f"❌ שגיאה בקריאת PDF: {e}")
+
+        return results
+
+    def _extract_relevant_excerpt(self, text: str, keywords: List[str], context_chars: int = 300) -> str:
+        """מחלץ קטע רלוונטי מטקסט"""
+        text_lower = text.lower()
+
+        # מצא את המיקום הראשון של מילת מפתח
+        best_pos = -1
+        for kw in keywords:
+            pos = text_lower.find(kw.lower())
+            if pos != -1 and (best_pos == -1 or pos < best_pos):
+                best_pos = pos
+
+        if best_pos == -1:
+            return text[:context_chars * 2] + "..."
+
+        # חילוץ קטע סביב המיקום
+        start = max(0, best_pos - context_chars)
+        end = min(len(text), best_pos + context_chars)
+
+        excerpt = text[start:end]
+
+        # ניקוי
+        excerpt = re.sub(r'\s+', ' ', excerpt).strip()
+
+        if start > 0:
+            excerpt = "..." + excerpt
+        if end < len(text):
+            excerpt = excerpt + "..."
+
+        return excerpt
+
     def sort_by_hativa(self, df: pd.DataFrame) -> pd.DataFrame:
         """ממיין לפי חטיבה"""
         if 'חטיבה' not in df.columns:
@@ -1064,6 +1216,7 @@ def interactive_menu():
 ║  7. זהה חטיבות שגויות                                            ║
 ║  8. הצע מסיחים חסרים                                             ║
 ║  9. שמור קובץ מתוקן                                              ║
+║  10. חפש תשובה בספרים 📚                                         ║
 ║  0. צא                                                           ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -1119,10 +1272,11 @@ def main():
         print("7. הצע מסיחים חסרים")
         print("8. שמור קובץ מתוקן")
         print("9. הצג דוח סיכום")
+        print("10. 📚 חפש תשובה בספרים")
         print("0. יציאה")
         print("─"*50)
 
-        choice = input("בחר אפשרות (0-9): ").strip()
+        choice = input("בחר אפשרות (0-10): ").strip()
 
         if choice == '1':
             # עיבוד כל הגיליונות
@@ -1248,6 +1402,83 @@ def main():
         elif choice == '9':
             # דוח סיכום
             print(processor.generate_report())
+
+        elif choice == '10':
+            # חיפוש בספרים
+            if not PDF_SUPPORT:
+                print("\n❌ PyMuPDF לא מותקן. להתקנה: pip3 install PyMuPDF")
+                continue
+
+            print("\n📚 חיפוש תשובה בספרים")
+            print("-" * 50)
+
+            # בחירת מקור החיפוש
+            print("\nאפשרויות:")
+            print("  1. חפש לפי מספר שורה מהקובץ")
+            print("  2. הקלד שאלה ידנית")
+
+            search_type = input("בחר (1/2): ").strip()
+
+            question_to_search = ""
+            hativa_to_search = None
+
+            if search_type == '1':
+                # חיפוש לפי שורה
+                print("\nגיליונות זמינים:")
+                for i, name in enumerate(processor.df_dict.keys(), 1):
+                    print(f"  {i}. {name}")
+
+                try:
+                    sheet_choice = input("בחר מספר גיליון: ").strip()
+                    sheet_idx = int(sheet_choice) - 1
+                    sheet_name = list(processor.df_dict.keys())[sheet_idx]
+                    df = processor.df_dict[sheet_name]
+
+                    row_num = int(input("מספר שורה (בExcel): ").strip()) - 2
+                    if 0 <= row_num < len(df):
+                        row = df.iloc[row_num]
+                        question_to_search = str(row.get('שאלה', ''))
+                        hativa_to_search = str(row.get('חטיבה', '')) if pd.notna(row.get('חטיבה')) else None
+                        print(f"\nשאלה: {question_to_search[:80]}...")
+                        if hativa_to_search:
+                            print(f"חטיבה: {hativa_to_search}")
+                    else:
+                        print("❌ מספר שורה לא תקין")
+                        continue
+                except (ValueError, IndexError):
+                    print("❌ בחירה לא תקינה")
+                    continue
+
+            elif search_type == '2':
+                # הקלדה ידנית
+                question_to_search = input("\nהקלד את השאלה: ").strip()
+                if not question_to_search:
+                    print("❌ לא הוקלדה שאלה")
+                    continue
+
+            # ביצוע החיפוש
+            print("\n🔍 מחפש בספרים...")
+            results = processor.search_in_books(question_to_search, hativa_to_search)
+
+            if not results:
+                print("\n❌ לא נמצאו תוצאות")
+            else:
+                print(f"\n📖 נמצאו {len(results)} תוצאות:\n")
+                for i, result in enumerate(results, 1):
+                    if 'error' in result:
+                        print(f"  ⚠️ {result['error']}")
+                    else:
+                        print(f"  ┌─ תוצאה {i} ─────────────────────────────────")
+                        print(f"  │ 📚 ספר: {result['book']}")
+                        print(f"  │ 📄 עמוד: {result['page']}")
+                        print(f"  │ 🔑 מילות מפתח: {', '.join(result['keywords_found'])}")
+                        print(f"  │")
+                        # הצגת הטקסט בשורות
+                        text_lines = result['text'].split('\n')
+                        for line in text_lines[:5]:  # עד 5 שורות
+                            if line.strip():
+                                print(f"  │ {line[:70]}")
+                        print(f"  └{'─'*50}\n")
 
         elif choice == '0':
             # יציאה
