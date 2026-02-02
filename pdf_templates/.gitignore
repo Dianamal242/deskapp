@@ -1,6 +1,10 @@
 # Ignore generated PDF outputs
 output/*.pdf
 
+# Ignore downloaded fonts (fonts folder is for custom fonts)
+fonts/*.ttf
+fonts/*.otf
+
 # Python cache
 __pycache__/
 *.pyc
