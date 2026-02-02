@@ -1,0 +1,11 @@
+# Ignore generated PDF outputs
+output/*.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
