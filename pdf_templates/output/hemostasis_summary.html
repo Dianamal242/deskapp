@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת הקרישה וההמוסטאזיס | Meteor Focus</title>
+    <style>
+        /* ============================================
+           Meteor Focus Design System - CSS
+           ============================================ */
+
+        :root {
+            /* Brand Colors */
+            --meteor-blue: #5A6FD6;
+            --meteor-purple: #8C6BBE;
+            --meteor-light: #8F73C8;
+            --meteor-icon: #5F6FDB;
+
+            /* Info Box Colors */
+            --box-tip-bg: #FFF9E6;
+            --box-tip-border: #FFD700;
+            --box-note-bg: #FFF0F5;
+            --box-note-border: #FFB6C1;
+            --box-warn-bg: #FFFDE7;
+            --box-warn-border: #FFA726;
+            --box-remember-bg: #E3F2FD;
+            --box-remember-border: #5A6FD6;
+            --box-forbid-bg: #FFEBEE;
+            --box-forbid-border: #E53935;
+            --box-success-bg: #E8F5E9;
+            --box-success-border: #4CAF50;
+
+            /* Table Colors */
+            --header-lavender: #E8EAF6;
+            --zebra-light: #F8F9FF;
+            --grid-light: #E0E0E0;
+
+            /* Text Colors */
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --text-light-gray: #888888;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eaf6 50%, #f0f4ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(90, 111, 214, 0.15);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--meteor-blue) 0%, var(--meteor-purple) 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header .logo {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        /* Section Heading */
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 40px 0 20px 0;
+        }
+
+        .section-heading:first-child {
+            margin-top: 0;
+        }
+
+        .section-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--meteor-blue) 0%, var(--meteor-purple) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--meteor-blue);
+        }
+
+        .section-title-en {
+            font-size: 14px;
+            color: var(--meteor-purple);
+            font-style: italic;
+            font-weight: normal;
+            margin-right: 10px;
+        }
+
+        /* Subsection */
+        .subsection-heading {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--meteor-purple);
+            margin: 30px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--meteor-light);
+        }
+
+        .subsection-heading .en {
+            font-size: 13px;
+            font-style: italic;
+            font-weight: normal;
+            color: var(--text-gray);
+        }
+
+        /* Paragraph */
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 20px 0;
+            border-right: 5px solid;
+            position: relative;
+        }
+
+        .info-box .box-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box .box-content {
+            font-size: 14px;
+        }
+
+        /* Tip Box - ⭐ */
+        .info-box.tip {
+            background: var(--box-tip-bg);
+            border-color: var(--box-tip-border);
+        }
+        .info-box.tip .box-title { color: #B8860B; }
+
+        /* Note Box - 💡 */
+        .info-box.note {
+            background: var(--box-note-bg);
+            border-color: var(--box-note-border);
+        }
+        .info-box.note .box-title { color: #C71585; }
+
+        /* Warning Box - ⚠️ */
+        .info-box.warning {
+            background: var(--box-warn-bg);
+            border-color: var(--box-warn-border);
+        }
+        .info-box.warning .box-title { color: #E65100; }
+
+        /* Remember Box - 📌 */
+        .info-box.remember {
+            background: var(--box-remember-bg);
+            border-color: var(--box-remember-border);
+        }
+        .info-box.remember .box-title { color: var(--meteor-blue); }
+
+        /* Forbidden Box - 🚫 */
+        .info-box.forbidden {
+            background: var(--box-forbid-bg);
+            border-color: var(--box-forbid-border);
+        }
+        .info-box.forbidden .box-title { color: #C62828; }
+
+        /* Success Box - ✔ */
+        .info-box.success {
+            background: var(--box-success-bg);
+            border-color: var(--box-success-border);
+        }
+        .info-box.success .box-title { color: #2E7D32; }
+
+        /* Bullet List */
+        .bullet-list {
+            list-style: none;
+            margin: 15px 0;
+            padding-right: 10px;
+        }
+
+        .bullet-list li {
+            padding: 6px 0;
+            padding-right: 25px;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: "●";
+            color: var(--meteor-purple);
+            position: absolute;
+            right: 0;
+            font-size: 12px;
+        }
+
+        /* Gradient Bar */
+        .gradient-bar {
+            background: linear-gradient(135deg, var(--meteor-blue) 0%, var(--meteor-purple) 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0 20px 0;
+        }
+
+        .gradient-bar.green {
+            background: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
+        }
+
+        .gradient-bar.orange {
+            background: linear-gradient(135deg, #FF7043 0%, #FFB74D 100%);
+        }
+
+        /* Tables */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .comparison-table th {
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .comparison-table th.correct {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .comparison-table th.incorrect {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .comparison-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--grid-light);
+            vertical-align: top;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:nth-child(even) td {
+            background: var(--zebra-light);
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin: 30px 0;
+            border: 1px solid #C8E6C9;
+        }
+
+        .summary-box h3 {
+            color: #2E7D32;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-box ul {
+            list-style: none;
+        }
+
+        .summary-box li {
+            padding: 8px 0;
+            padding-right: 25px;
+            position: relative;
+            border-bottom: 1px dashed #C8E6C9;
+        }
+
+        .summary-box li:last-child {
+            border-bottom: none;
+        }
+
+        .summary-box li::before {
+            content: "●";
+            color: var(--meteor-purple);
+            position: absolute;
+            right: 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--header-lavender);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-light-gray);
+        }
+
+        .footer a {
+            color: var(--meteor-blue);
+            text-decoration: none;
+        }
+
+        /* Success Banner */
+        .success-banner {
+            background: var(--box-success-bg);
+            border: 2px solid var(--box-success-border);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin: 40px 0 20px 0;
+        }
+
+        .success-banner h2 {
+            color: #2E7D32;
+            font-size: 24px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .section-heading {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .comparison-table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">METEOR FOCUS</div>
+            <h1>מערכת הקרישה וההמוסטאזיס</h1>
+            <div class="subtitle">סיכום מקיף | Hemostasis & Coagulation | פיזיולוגיה</div>
+        </header>
+
+        <!-- Content -->
+        <main class="content">
+
+            <!-- Section 1 -->
+            <div class="section-heading">
+                <div class="section-number">1</div>
+                <h2 class="section-title">
+                    מטרת מערכת הקרישה
+                    <span class="section-title-en">(Purpose of the Coagulation System)</span>
+                </h2>
+            </div>
+
+            <p>
+                המטרה המרכזית של מערכת ההמוסטאזיס היא <strong>לעצור דימום מבלי לעצור את זרימת הדם הכללית</strong>.
+                מדובר במנגנון מבוקר, מקומי ומדויק, שמופעל אך ורק במקום שבו נגרם נזק לכלי דם.
+            </p>
+
+            <p>
+                הגוף נדרש לאזן בין שני צרכים מנוגדים: מצד אחד למנוע אובדן דם, ומצד שני לשמור על פרפוזיה תקינה לכל שאר הרקמות.
+            </p>
+
+            <div class="info-box remember">
+                <div class="box-title">📌 חשוב לבחינה</div>
+                <div class="box-content">
+                    המערכת חייבת לייצר קריש יציב רק באתר הפגיעה, תוך מניעה של יצירת קרישים מפושטים שעלולים לחסום זרימת דם תקינה.
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="section-heading">
+                <div class="section-number">2</div>
+                <h2 class="section-title">
+                    אבני הבניין של ההמוסטאזיס
+                    <span class="section-title-en">(Building Blocks of Hemostasis)</span>
+                </h2>
+            </div>
+
+            <!-- 2.1 -->
+            <h3 class="subsection-heading">
+                טסיות דם והפקק הטסייתי
+                <span class="en">(Platelets & Platelet Plug)</span>
+            </h3>
+
+            <p>
+                הטסיות הן מרכיב מרכזי בשלב הראשוני של ההמוסטאזיס. במצב תקין הן נעות בזרם הדם כיחידות נפרדות ואינן נצמדות זו לזו.
+            </p>
+
+            <p>
+                בעת פגיעה בדופן כלי הדם מתרחש תהליך של <strong>הפעלת טסיות</strong>, שבמהלכו משתנה המבנה של ממברנת הטסית והיא נעשית "דביקה".
+                כתוצאה מכך הטסיות נצמדות זו לזו בתהליך של <strong>Aggregation</strong> ויוצרות פקק טסייתי חצי-מוצק החוסם זמנית את אזור הפגיעה.
+            </p>
+
+            <div class="info-box note">
+                <div class="box-title">💡 שימו לב</div>
+                <div class="box-content">
+                    <strong>הפקק הטסייתי אינו קריש יציב!</strong> הוא זמני, מחזיק שעות ספורות בלבד, ואינו מספק המוסטאזיס מלא.
+                    תפקידו העיקרי הוא לייצר חסימה ראשונית ולהפעיל את המשך תהליך הקרישה.
+                </div>
+            </div>
+
+            <!-- 2.2 -->
+            <h3 class="subsection-heading">
+                חומרים מפעילי טסיות
+                <span class="en">(Platelet Activating Substances)</span>
+            </h3>
+
+            <p>
+                הפעלת הטסיות וההיצמדות ביניהן מתרחשת בעקבות חשיפה ושחרור של מספר חומרים מרכזיים:
+            </p>
+
+            <ul class="bullet-list">
+                <li>ADP - אדנוזין דיפוספט</li>
+                <li>סידן (Ca++)</li>
+                <li>Thromboxane A₂ (TXA₂) - תרומבוקסן</li>
+                <li>קולגן (Collagen)</li>
+            </ul>
+
+            <div class="info-box tip">
+                <div class="box-title">⭐ טיפ לזכירה</div>
+                <div class="box-content">
+                    הטסיות עצמן מפרישות חלק מהחומרים הללו לאחר שהופעלו, וכך נוצר מנגנון של <strong>הגברה עצמית (Positive Feedback)</strong> שמחזק את יצירת הפקק הטסייתי.
+                </div>
+            </div>
+
+            <!-- 2.3 -->
+            <h3 class="subsection-heading">
+                גורמי הקרישה וסידן
+                <span class="en">(Clotting Factors & Calcium)</span>
+            </h3>
+
+            <p>
+                מעבר לשלב הטסייתי, תהליך ההמוסטאזיס תלוי במערכת של <strong>גורמי קרישה</strong>.
+                גורמים אלו הם אנזימים המצויים בדם במצב לא פעיל, והם מופעלים בסדרה מדורגת.
+            </p>
+
+            <p>
+                כל גורם שמופעל מפעיל את הגורם הבא אחריו, וכך נוצרת <strong>שרשרת תגובות רציפה (Cascade)</strong>.
+            </p>
+
+            <div class="info-box warning">
+                <div class="box-title">⚠️ חשוב לדעת</div>
+                <div class="box-content">
+                    סידן וטסיות משתתפים כמעט בכל שלב של הקסקדה, והיעדרם פוגע משמעותית ביכולת ליצור קריש יציב.
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="section-heading">
+                <div class="section-number">3</div>
+                <h2 class="section-title">
+                    שלושת הצירים של ההמוסטאזיס
+                    <span class="section-title-en">(Three Axes of Hemostasis)</span>
+                </h2>
+            </div>
+
+            <div class="gradient-bar">מפגיעה לקריש יציב</div>
+
+            <!-- 3.1 -->
+            <h3 class="subsection-heading">
+                הפקק הטסייתי – ההתחלה המיידית
+                <span class="en">(Platelet Plug - Immediate Response)</span>
+            </h3>
+
+            <p>
+                מיד לאחר פגיעה בדופן כלי הדם מתרחשת היצמדות טסיות ויצירת פקק טסייתי זמני.
+                שלב זה מתרחש במהירות ומהווה את הטריגר להפעלת מנגנון הקרישה האנזימטי.
+            </p>
+
+            <!-- 3.2 -->
+            <h3 class="subsection-heading">
+                קסקדת הקרישה – מנגנון מתעצם
+                <span class="en">(Coagulation Cascade)</span>
+            </h3>
+
+            <p>
+                קסקדת הקרישה היא מנגנון של שרשרת תגובות שמתחזקת במהירות.
+                התחלה מינימלית עלולה להוביל לתגובה מתגלגלת רחבה, שקשה לעצור לאחר שהחלה.
+            </p>
+
+            <div class="info-box warning">
+                <div class="box-title">⚠️ זהירות</div>
+                <div class="box-content">
+                    זהו מנגנון יעיל אך גם מסוכן אם אינו מבוקר כראוי!
+                </div>
+            </div>
+
+            <!-- 3.3 -->
+            <h3 class="subsection-heading">
+                הנתיבים של הקסקדה
+                <span class="en">(Cascade Pathways)</span>
+            </h3>
+
+            <p>הקסקדה מופעלת דרך שני נתיבים:</p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th class="correct">✅ המסלול החיצוני (Extrinsic)</th>
+                        <th class="incorrect">❌ המסלול הפנימי (Intrinsic)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>מופעל ע"י נזק רקמתי</td>
+                        <td>מופעל ע"י מגע עם משטח</td>
+                    </tr>
+                    <tr>
+                        <td>Tissue Factor (TF)</td>
+                        <td>Contact Activation</td>
+                    </tr>
+                    <tr>
+                        <td>מהיר יותר</td>
+                        <td>איטי יותר</td>
+                    </tr>
+                    <tr>
+                        <td>Factor VII</td>
+                        <td>Factors XII, XI, IX, VIII</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box remember">
+                <div class="box-title">📌 חשוב לבחינה</div>
+                <div class="box-content">
+                    שני המסלולים מתאחדים בהמשך ל<strong>נתיב משותף (Common Pathway)</strong>, שבסופו נוצר קריש פיברין יציב המספק המוסטאזיס מלא ומבוקר.
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="gradient-bar green">סיכום נקודות מפתח</div>
+
+            <div class="summary-box">
+                <ul>
+                    <li>מטרת ההמוסטאזיס: עצירת דימום מקומית מבלי לפגוע בזרימת הדם הכללית</li>
+                    <li>הפקק הטסייתי הוא זמני בלבד - מחזיק שעות ספורות</li>
+                    <li>חומרים מפעילי טסיות: ADP, סידן, TXA₂, קולגן</li>
+                    <li>גורמי הקרישה מופעלים בשרשרת (קסקדה)</li>
+                    <li>סידן חיוני כמעט בכל שלב של הקסקדה</li>
+                    <li>שני נתיבים: חיצוני (מהיר) ופנימי (איטי) → נתיב משותף → פיברין</li>
+                </ul>
+            </div>
+
+            <!-- Success Banner -->
+            <div class="success-banner">
+                <h2>✔ בהצלחה בלימודים!</h2>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div>© Meteor Focus</div>
+            <div><a href="https://he.meteorfocus.com">he.meteorfocus.com</a></div>
+            <div>meteorfocus@gmail.com</div>
+        </footer>
+    </div>
+</body>
+</html>
