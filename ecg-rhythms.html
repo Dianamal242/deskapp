@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+	<head>
+		<meta charset="utf-8" />
+		<title>ECG Rhythms - קצבי לב</title>
+
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="vendors/images/apple-touch-icon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="vendors/images/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="vendors/images/favicon-16x16.png"
+		/>
+
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1"
+		/>
+
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="vendors/styles/icon-font.min.css"
+		/>
+		<link rel="stylesheet" type="text/css" href="vendors/styles/style.css" />
+
+		<style>
+			body {
+				direction: rtl;
+				text-align: right;
+			}
+			.ecg-card {
+				border-radius: 10px;
+				overflow: hidden;
+				margin-bottom: 30px;
+				box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+				transition: transform 0.2s;
+			}
+			.ecg-card:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+			}
+			.ecg-card .card-header-colored {
+				padding: 12px 20px;
+				color: #fff;
+				font-size: 18px;
+				font-weight: 700;
+			}
+			.ecg-card .card-header-colored .en-name {
+				font-weight: 400;
+				opacity: 0.9;
+				font-size: 14px;
+			}
+			.ecg-svg-wrap {
+				background: #f9fafb;
+				padding: 15px 10px;
+				border-bottom: 1px solid #eee;
+				text-align: center;
+				position: relative;
+				overflow: hidden;
+			}
+			.ecg-svg-wrap::before {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				background: repeating-linear-gradient(
+					90deg,
+					transparent,
+					transparent 19px,
+					rgba(200,200,200,0.15) 19px,
+					rgba(200,200,200,0.15) 20px
+				),
+				repeating-linear-gradient(
+					0deg,
+					transparent,
+					transparent 19px,
+					rgba(200,200,200,0.15) 19px,
+					rgba(200,200,200,0.15) 20px
+				);
+				pointer-events: none;
+			}
+			.ecg-svg-wrap svg {
+				width: 100%;
+				height: 80px;
+			}
+			.ecg-info {
+				padding: 15px 20px;
+			}
+			.ecg-info table {
+				width: 100%;
+			}
+			.ecg-info table td {
+				padding: 5px 0;
+				vertical-align: top;
+			}
+			.ecg-info table td.label-col {
+				font-weight: 700;
+				width: 70px;
+				color: #333;
+			}
+			.ecg-info table td.value-col {
+				color: #555;
+			}
+			.bg-normal { background: #10b981; }
+			.bg-tachy { background: #ef4444; }
+			.bg-brady { background: #3b82f6; }
+			.bg-pac { background: #f59e0b; }
+			.bg-af { background: #dc2626; }
+			.bg-svt { background: #8b5cf6; }
+			.bg-vt { background: #991b1b; }
+			.bg-vf { background: #1e1e1e; }
+			.bg-block1 { background: #6366f1; }
+			.bg-block2 { background: #4338ca; }
+			.bg-block3 { background: #312e81; }
+			.bg-flutter { background: #e11d48; }
+
+			.badge-rate {
+				display: inline-block;
+				padding: 2px 10px;
+				border-radius: 12px;
+				font-size: 13px;
+				font-weight: 600;
+			}
+			.page-header-ecg {
+				text-align: center;
+				margin-bottom: 30px;
+			}
+			.page-header-ecg h1 {
+				font-size: 28px;
+				font-weight: 800;
+				color: #333;
+			}
+			.page-header-ecg p {
+				color: #888;
+				font-size: 16px;
+			}
+			.lead-info-section {
+				margin-bottom: 40px;
+			}
+			.lead-info-section .card {
+				border-radius: 10px;
+			}
+			.lead-table td, .lead-table th {
+				text-align: right;
+				vertical-align: middle;
+			}
+			.lead-color {
+				display: inline-block;
+				width: 14px;
+				height: 14px;
+				border-radius: 3px;
+				margin-left: 6px;
+				vertical-align: middle;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="pre-loader">
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<img src="vendors/images/deskapp-logo.svg" alt="" />
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>
+
+		<div class="header">
+			<div class="header-left">
+				<div class="menu-icon bi bi-list"></div>
+			</div>
+			<div class="header-right">
+				<div class="user-info-dropdown">
+					<div class="dropdown">
+						<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+							<span class="user-name">ECG Dashboard</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="main-container">
+			<div class="xs-pd-20-10 pd-ltr-20">
+
+				<!-- Page Header -->
+				<div class="page-header-ecg">
+					<h1>סיכום קצבי לב — ECG Rhythms</h1>
+					<p>טבלה מסכמת עם ציורי ECG לכל קצב, מאפיינים, וטיפול</p>
+				</div>
+
+				<!-- 12-Lead ECG Info -->
+				<div class="lead-info-section">
+					<div class="card">
+						<div class="card-header bg-primary text-white">
+							<h4 class="mb-0" style="color:#fff;">לידים של אק"ג — 12 Lead ECG</h4>
+						</div>
+						<div class="card-body">
+							<div class="row">
+								<div class="col-md-6">
+									<h5 class="mb-3 font-weight-bold">לידים של הגפיים (Limb Leads)</h5>
+									<table class="table table-bordered lead-table">
+										<thead class="thead-light">
+											<tr><th>ליד</th><th>סוג</th><th>מיקום / כיוון</th></tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><span class="lead-color" style="background:#e74c3c"></span><strong>Lead I</strong></td>
+												<td>ביפולרי</td>
+												<td>RA(-) → LA(+) — לרוחב, 0°</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#2ecc71"></span><strong>Lead II</strong></td>
+												<td>ביפולרי</td>
+												<td>RA(-) → LL(+) — אלכסון, +60°</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#f1c40f"></span><strong>Lead III</strong></td>
+												<td>ביפולרי</td>
+												<td>LA(-) → LL(+) — אלכסון, +120°</td>
+											</tr>
+											<tr>
+												<td><strong>aVR</strong></td>
+												<td>יוניפולרי מוגבר</td>
+												<td>יד ימין — כיוון -150°</td>
+											</tr>
+											<tr>
+												<td><strong>aVL</strong></td>
+												<td>יוניפולרי מוגבר</td>
+												<td>יד שמאל — כיוון -30°</td>
+											</tr>
+											<tr>
+												<td><strong>aVF</strong></td>
+												<td>יוניפולרי מוגבר</td>
+												<td>רגל שמאל — כיוון +90°</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="col-md-6">
+									<h5 class="mb-3 font-weight-bold">לידים פרה-קורדיאליים (Precordial Leads)</h5>
+									<table class="table table-bordered lead-table">
+										<thead class="thead-light">
+											<tr><th>ליד</th><th>מיקום על החזה</th><th>מה רואים</th></tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><span class="lead-color" style="background:#e74c3c"></span><strong>V1</strong></td>
+												<td>מרווח בין-צלעי 4, ימין לסטרנום</td>
+												<td>ספטום ימני, חדר ימין</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#f39c12"></span><strong>V2</strong></td>
+												<td>מרווח בין-צלעי 4, שמאל לסטרנום</td>
+												<td>ספטום שמאלי</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#2ecc71"></span><strong>V3</strong></td>
+												<td>בין V2 ל-V4</td>
+												<td>דופן קדמית</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#3498db"></span><strong>V4</strong></td>
+												<td>מרווח בין-צלעי 5, קו מיד-קלביקולרי</td>
+												<td>אפקס (חוד הלב)</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#9b59b6"></span><strong>V5</strong></td>
+												<td>קו אקסילרי קדמי, גובה V4</td>
+												<td>דופן צדדית</td>
+											</tr>
+											<tr>
+												<td><span class="lead-color" style="background:#1abc9c"></span><strong>V6</strong></td>
+												<td>קו מיד-אקסילרי, גובה V4</td>
+												<td>דופן צדדית</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- Lead placement SVG diagram -->
+							<div class="text-center mt-4">
+								<svg viewBox="0 0 500 300" width="400" height="240" style="max-width:100%;">
+									<!-- Torso outline -->
+									<ellipse cx="250" cy="150" rx="120" ry="130" fill="none" stroke="#ccc" stroke-width="2"/>
+									<!-- Sternum line -->
+									<line x1="250" y1="30" x2="250" y2="270" stroke="#ddd" stroke-width="1" stroke-dasharray="4"/>
+									<!-- V1 -->
+									<circle cx="230" cy="120" r="8" fill="#e74c3c"/>
+									<text x="210" y="112" font-size="11" fill="#e74c3c" font-weight="bold">V1</text>
+									<!-- V2 -->
+									<circle cx="270" cy="120" r="8" fill="#f39c12"/>
+									<text x="282" y="112" font-size="11" fill="#f39c12" font-weight="bold">V2</text>
+									<!-- V3 -->
+									<circle cx="290" cy="145" r="8" fill="#2ecc71"/>
+									<text x="302" y="145" font-size="11" fill="#2ecc71" font-weight="bold">V3</text>
+									<!-- V4 -->
+									<circle cx="305" cy="170" r="8" fill="#3498db"/>
+									<text x="317" y="170" font-size="11" fill="#3498db" font-weight="bold">V4</text>
+									<!-- V5 -->
+									<circle cx="330" cy="170" r="8" fill="#9b59b6"/>
+									<text x="342" y="170" font-size="11" fill="#9b59b6" font-weight="bold">V5</text>
+									<!-- V6 -->
+									<circle cx="355" cy="170" r="8" fill="#1abc9c"/>
+									<text x="367" y="170" font-size="11" fill="#1abc9c" font-weight="bold">V6</text>
+									<!-- Limb leads labels -->
+									<text x="80" y="60" font-size="12" fill="#e74c3c" font-weight="bold">RA (יד ימין)</text>
+									<text x="350" y="60" font-size="12" fill="#f1c40f" font-weight="bold">LA (יד שמאל)</text>
+									<text x="220" y="295" font-size="12" fill="#2ecc71" font-weight="bold">LL (רגל שמאל)</text>
+									<!-- Limb lead lines -->
+									<line x1="130" y1="65" x2="220" y2="100" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3"/>
+									<line x1="380" y1="65" x2="300" y2="100" stroke="#f1c40f" stroke-width="1" stroke-dasharray="3"/>
+									<line x1="250" y1="280" x2="260" y2="250" stroke="#2ecc71" stroke-width="1" stroke-dasharray="3"/>
+								</svg>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- ECG Rhythm Cards -->
+				<div class="row">
+
+					<!-- NSR - Normal Sinus Rhythm -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-normal">
+								קצב סינוס תקין <span class="en-name">— NSR (Normal Sinus Rhythm)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- NSR: regular P-QRS-T complexes, 75 bpm -->
+									<polyline fill="none" stroke="#10b981" stroke-width="2"
+										points="0,40 30,40 40,40 50,35 60,40 65,40 70,42 73,60 76,10 79,55 82,40 90,40 100,38 110,36 120,40
+										150,40 160,40 170,35 180,40 185,40 190,42 193,60 196,10 199,55 202,40 210,40 220,38 230,36 240,40
+										270,40 280,40 290,35 300,40 305,40 310,42 313,60 316,10 319,55 322,40 330,40 340,38 350,36 360,40
+										390,40 400,40 410,35 420,40 425,40 430,42 433,60 436,10 439,55 442,40 450,40 460,38 470,36 480,40
+										510,40 520,40 530,35 540,40 545,40 550,42 553,60 556,10 559,55 562,40 570,40 580,38 590,36 600,40" />
+									<text x="560" y="15" font-size="11" fill="#999">~75 bpm</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col"><span class="badge badge-success badge-rate">60-100 bpm</span> סדיר</td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">P-QRS-T ברורים, גל P לפני כל QRS, מרווח PR קבוע 0.12-0.20 שנ'</td></tr>
+									<tr><td class="label-col">משמעות</td><td class="value-col"><strong style="color:#10b981">תקין</strong> — קצב ייחוס</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Sinus Tachycardia -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-tachy">
+								סינוס טכיקרדיה <span class="en-name">— Sinus Tachycardia</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- Sinus tachy: faster rate, closer complexes -->
+									<polyline fill="none" stroke="#ef4444" stroke-width="2"
+										points="0,40 15,40 22,35 30,40 33,42 36,60 39,10 42,55 45,40 52,38 58,36 65,40
+										80,40 87,35 95,40 98,42 101,60 104,10 107,55 110,40 117,38 123,36 130,40
+										145,40 152,35 160,40 163,42 166,60 169,10 172,55 175,40 182,38 188,36 195,40
+										210,40 217,35 225,40 228,42 231,60 234,10 237,55 240,40 247,38 253,36 260,40
+										275,40 282,35 290,40 293,42 296,60 299,10 302,55 305,40 312,38 318,36 325,40
+										340,40 347,35 355,40 358,42 361,60 364,10 367,55 370,40 377,38 383,36 390,40
+										405,40 412,35 420,40 423,42 426,60 429,10 432,55 435,40 442,38 448,36 455,40
+										470,40 477,35 485,40 488,42 491,60 494,10 497,55 500,40 507,38 513,36 520,40
+										535,40 542,35 550,40 553,42 556,60 559,10 562,55 565,40 572,38 578,36 585,40 600,40" />
+									<text x="555" y="15" font-size="11" fill="#999">~120 bpm</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col"><span class="badge badge-danger badge-rate">&gt;100 bpm</span> סדיר</td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">מורפולוגיה תקינה, קומפלקסים צפופים יותר</td></tr>
+									<tr><td class="label-col">סיבות</td><td class="value-col">חום, כאב, אנמיה, חרדה, התייבשות, תרופות</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">טפל בגורם הבסיסי</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Sinus Bradycardia -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-brady">
+								סינוס ברדיקרדיה <span class="en-name">— Sinus Bradycardia</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- Bradycardia: slow, spread out complexes -->
+									<polyline fill="none" stroke="#3b82f6" stroke-width="2"
+										points="0,40 60,40 75,35 90,40 96,42 100,60 104,10 108,55 112,40 130,38 145,36 160,40
+										220,40 235,35 250,40 256,42 260,60 264,10 268,55 272,40 290,38 305,36 320,40
+										380,40 395,35 410,40 416,42 420,60 424,10 428,55 432,40 450,38 465,36 480,40
+										540,40 555,35 570,40 576,42 580,60 584,10 588,55 592,40 600,40" />
+									<text x="555" y="15" font-size="11" fill="#999">~50 bpm</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col"><span class="badge badge-primary badge-rate">&lt;60 bpm</span> סדיר</td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">מורפולוגיה תקינה, מרווחים רחוקים</td></tr>
+									<tr><td class="label-col">סיבות</td><td class="value-col">ספורטאים, תרופות (חוסמי בטא, דיגוקסין), היפותרמיה, תת-פעילות בלוטת התריס</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">Atropine IV ← נוזלים ← Pacing ← O₂. מנת יתר בטא: Glucagon</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- PAC -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-pac">
+								קומפלקס פרוזדורי מוקדם <span class="en-name">— PAC (Premature Atrial Complex)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- PAC: regular with one early beat -->
+									<polyline fill="none" stroke="#f59e0b" stroke-width="2"
+										points="0,40 30,40 40,35 50,40 55,42 58,60 61,10 64,55 67,40 80,38 90,36 100,40
+										130,40 140,35 150,40 155,42 158,60 161,10 164,55 167,40 180,38 190,36 200,40
+										215,40 220,32 228,40 231,42 234,58 237,12 240,53 243,40 253,38 260,36 268,40
+										298,40 308,35 318,40 323,42 326,60 329,10 332,55 335,40 348,38 358,36 368,40
+										398,40 408,35 418,40 423,42 426,60 429,10 432,55 435,40 448,38 458,36 468,40
+										498,40 508,35 518,40 523,42 526,60 529,10 532,55 535,40 548,38 558,36 568,40 600,40" />
+									<!-- PAC label -->
+									<text x="215" y="15" font-size="10" fill="#f59e0b" font-weight="bold">PAC ↓</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">ECG</td><td class="value-col">גל P שונה מגיע מוקדם, QRS צר (תקין)</td></tr>
+									<tr><td class="label-col">סימנים</td><td class="value-col">לרוב ללא. "דילוג" בדופק</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">לא צריך. אם תכופים — הסר גורם (קפאין, סטרס)</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Atrial Fibrillation -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-af">
+								פרפור פרוזדורים <span class="en-name">— AF (Atrial Fibrillation)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- AF: irregular baseline, no P waves, irregular R-R -->
+									<polyline fill="none" stroke="#dc2626" stroke-width="2"
+										points="0,40 5,39 10,41 15,39 20,41 25,40 28,42 31,58 34,12 37,52 40,40
+										45,39 50,41 55,40 58,39 63,41 68,40 73,39 78,41 82,40 90,42 93,60 96,8 99,55 102,40
+										107,41 112,39 117,41 122,39 127,41 130,40 138,42 141,62 144,10 147,56 150,40
+										153,39 158,41 163,39 165,41 168,39 172,41 176,39 180,41 187,42 189,59 192,11 195,54 198,40
+										202,39 207,41 215,39 220,41 222,39 225,42 228,60 231,9 234,56 237,40
+										241,41 248,39 255,41 258,39 265,41 270,39 280,41 290,42 293,58 296,12 299,53 302,40
+										307,39 314,41 320,39 325,41 328,40 332,42 335,61 338,10 341,55 344,40
+										348,41 355,39 362,41 368,39 375,41 380,39 388,42 391,60 394,8 397,56 400,40
+										405,39 412,41 418,39 425,41 430,40 440,42 443,59 446,11 449,54 452,40
+										457,39 462,41 470,39 478,41 485,42 488,62 491,10 494,55 497,40
+										502,39 510,41 518,39 525,41 535,42 538,60 541,9 544,54 547,40
+										552,41 558,39 565,41 572,39 580,41 585,39 590,41 595,39 600,40" />
+									<text x="545" y="15" font-size="11" fill="#999">AF</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col">פרוזדורי <span class="badge badge-danger badge-rate">350-600</span> | חדרי 120-200, <strong>לא סדיר</strong></td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">אין גלי P, קו בסיס מפרפר, R-R לא סדיר</td></tr>
+									<tr><td class="label-col">סיכון</td><td class="value-col">שבץ מוחי (קריש בפרוזדור). CHA₂DS₂-VASc לשקילת נוגד קרישה</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">שליטה בקצב: חוסמי בטא / Diltiazem. אנטי-קואגולציה. Cardioversion אם לא יציב</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Atrial Flutter -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-flutter">
+								רפרוף פרוזדורים <span class="en-name">— Atrial Flutter</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- Flutter: sawtooth pattern -->
+									<polyline fill="none" stroke="#e11d48" stroke-width="2"
+										points="0,40 10,30 20,45 30,30 40,45 50,30 55,42 58,60 61,10 64,55 67,40
+										77,30 87,45 97,30 107,45 117,30 122,42 125,60 128,10 131,55 134,40
+										144,30 154,45 164,30 174,45 184,30 189,42 192,60 195,10 198,55 201,40
+										211,30 221,45 231,30 241,45 251,30 256,42 259,60 262,10 265,55 268,40
+										278,30 288,45 298,30 308,45 318,30 323,42 326,60 329,10 332,55 335,40
+										345,30 355,45 365,30 375,45 385,30 390,42 393,60 396,10 399,55 402,40
+										412,30 422,45 432,30 442,45 452,30 457,42 460,60 463,10 466,55 469,40
+										479,30 489,45 499,30 509,45 519,30 524,42 527,60 530,10 533,55 536,40
+										546,30 556,45 566,30 576,45 586,30 596,45 600,40" />
+									<text x="540" y="15" font-size="11" fill="#999">Flutter</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col">פרוזדורי <span class="badge badge-danger badge-rate">~300 bpm</span> | חדרי 150 (יחס 2:1 טיפוסי)</td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">דפוס "שיני מסור" (sawtooth) — בולט ב-II, III, aVF, V1</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">שליטה בקצב, אנטי-קואגולציה, אבלציה</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- SVT -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-svt">
+								טכיקרדיה על-חדרית <span class="en-name">— SVT (Supraventricular Tachycardia)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- SVT: fast, narrow, regular, no visible P -->
+									<polyline fill="none" stroke="#8b5cf6" stroke-width="2"
+										points="0,40 12,40 16,42 19,58 22,12 25,54 28,40
+										40,40 44,42 47,58 50,12 53,54 56,40
+										68,40 72,42 75,58 78,12 81,54 84,40
+										96,40 100,42 103,58 106,12 109,54 112,40
+										124,40 128,42 131,58 134,12 137,54 140,40
+										152,40 156,42 159,58 162,12 165,54 168,40
+										180,40 184,42 187,58 190,12 193,54 196,40
+										208,40 212,42 215,58 218,12 221,54 224,40
+										236,40 240,42 243,58 246,12 249,54 252,40
+										264,40 268,42 271,58 274,12 277,54 280,40
+										292,40 296,42 299,58 302,12 305,54 308,40
+										320,40 324,42 327,58 330,12 333,54 336,40
+										348,40 352,42 355,58 358,12 361,54 364,40
+										376,40 380,42 383,58 386,12 389,54 392,40
+										404,40 408,42 411,58 414,12 417,54 420,40
+										432,40 436,42 439,58 442,12 445,54 448,40
+										460,40 464,42 467,58 470,12 473,54 476,40
+										488,40 492,42 495,58 498,12 501,54 504,40
+										516,40 520,42 523,58 526,12 529,54 532,40
+										544,40 548,42 551,58 554,12 557,54 560,40
+										572,40 576,42 579,58 582,12 585,54 588,40 600,40" />
+									<text x="545" y="15" font-size="11" fill="#999">~200 bpm</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col"><span class="badge badge-rate" style="background:#8b5cf6;color:#fff">100-280 bpm</span> סדיר</td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">QRS צר, סדיר, P לא נראה (מוסתר ב-QRS או T)</td></tr>
+									<tr><td class="label-col">סימנים</td><td class="value-col">דפיקות לב, סחרחורת, קוצר נשימה</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">מהלכי ואגאל (Valsalva) → Adenosine IV 6mg → 12mg. אם לא יציב: Cardioversion</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- VT - Ventricular Tachycardia -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-vt">
+								טכיקרדיה חדרית <span class="en-name">— VT (Ventricular Tachycardia)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- VT: wide QRS, fast, regular -->
+									<polyline fill="none" stroke="#991b1b" stroke-width="2.5"
+										points="0,40 15,40 20,35 25,55 28,65 32,5 38,70 44,15 48,60 52,38 56,42 60,40
+										75,40 80,35 85,55 88,65 92,5 98,70 104,15 108,60 112,38 116,42 120,40
+										135,40 140,35 145,55 148,65 152,5 158,70 164,15 168,60 172,38 176,42 180,40
+										195,40 200,35 205,55 208,65 212,5 218,70 224,15 228,60 232,38 236,42 240,40
+										255,40 260,35 265,55 268,65 272,5 278,70 284,15 288,60 292,38 296,42 300,40
+										315,40 320,35 325,55 328,65 332,5 338,70 344,15 348,60 352,38 356,42 360,40
+										375,40 380,35 385,55 388,65 392,5 398,70 404,15 408,60 412,38 416,42 420,40
+										435,40 440,35 445,55 448,65 452,5 458,70 464,15 468,60 472,38 476,42 480,40
+										495,40 500,35 505,55 508,65 512,5 518,70 524,15 528,60 532,38 536,42 540,40
+										555,40 560,35 565,55 568,65 572,5 578,70 584,15 588,60 592,38 596,42 600,40" />
+									<text x="555" y="15" font-size="11" fill="#999">~180 bpm</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col"><span class="badge badge-rate" style="background:#991b1b;color:#fff">100-250 bpm</span> סדיר (לרוב)</td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col"><strong>QRS רחב (&gt;0.12 שנ')</strong>, סדיר. AV dissociation</td></tr>
+									<tr><td class="label-col">סכנה</td><td class="value-col" style="color:#dc2626"><strong>מסכן חיים! יכול להתדרדר ל-VF</strong></td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">יציב: Amiodarone IV. לא יציב / ללא דופק: <strong>דפיברילציה מיידית!</strong></td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- VF - Ventricular Fibrillation -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-vf">
+								פרפור חדרים <span class="en-name">— VF (Ventricular Fibrillation)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- VF: chaotic, no organized pattern -->
+									<polyline fill="none" stroke="#333" stroke-width="2"
+										points="0,40 8,25 15,55 20,20 28,60 33,30 38,50 42,15 48,65 52,28 58,55 62,20 68,58 72,25 78,52
+										82,18 88,62 92,32 98,48 102,22 108,60 112,35 118,52 122,15 128,65 132,30 138,55 142,18 148,62
+										152,28 158,50 162,22 168,58 172,32 178,48 182,20 188,60 192,35 198,55 202,15 208,65 212,30 218,52
+										222,18 228,62 232,28 238,50 242,22 248,58 252,35 258,48 262,20 268,62 272,32 278,55 282,15 288,65
+										292,30 298,52 302,18 308,62 312,28 318,48 322,22 328,58 332,35 338,50 342,20 348,62 352,32 358,55
+										362,15 368,65 372,28 378,52 382,18 388,60 392,30 398,48 402,22 408,58 412,35 418,55 422,15 428,65
+										432,30 438,52 442,18 448,62 452,28 458,50 462,22 468,58 472,32 478,48 482,20 488,60 492,35 498,55
+										502,15 508,65 512,30 518,52 522,18 528,62 532,28 538,50 542,22 548,58 552,35 558,48 562,20 568,60
+										572,32 578,55 582,18 588,62 592,28 598,48 600,35" />
+									<text x="555" y="15" font-size="11" fill="#999">VF</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col"><strong>כאוטי, לא ניתן למדידה</strong></td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">גלים כאוטיים ללא דפוס. אין P, אין QRS, אין T</td></tr>
+									<tr><td class="label-col">סכנה</td><td class="value-col" style="color:#dc2626"><strong>דום לב! מוות תוך דקות ללא טיפול</strong></td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col"><strong>CPR מיידי + דפיברילציה!</strong> Epinephrine 1mg כל 3-5 דקות. Amiodarone 300mg</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- 1st Degree AV Block -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-block1">
+								חסם AV דרגה 1 <span class="en-name">— 1st Degree AV Block</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- 1st degree: normal rhythm but PR > 0.20 (longer gap between P and QRS) -->
+									<polyline fill="none" stroke="#6366f1" stroke-width="2"
+										points="0,40 30,40 42,35 55,40 65,40 75,40 78,42 81,60 84,10 87,55 90,40 102,38 112,36 125,40
+										155,40 167,35 180,40 190,40 200,40 203,42 206,60 209,10 212,55 215,40 227,38 237,36 250,40
+										280,40 292,35 305,40 315,40 325,40 328,42 331,60 334,10 337,55 340,40 352,38 362,36 375,40
+										405,40 417,35 430,40 440,40 450,40 453,42 456,60 459,10 462,55 465,40 477,38 487,36 500,40
+										530,40 542,35 555,40 565,40 575,40 578,42 581,60 584,10 587,55 590,40 600,40" />
+									<!-- PR interval markers -->
+									<line x1="42" y1="70" x2="78" y2="70" stroke="#6366f1" stroke-width="1"/>
+									<text x="48" y="78" font-size="9" fill="#6366f1">PR ארוך</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">ECG</td><td class="value-col">PR &gt; 0.20 שניות (ארוך), כל P מוביל ל-QRS</td></tr>
+									<tr><td class="label-col">משמעות</td><td class="value-col">איטוי הולכה ב-AV node. לרוב שפיר</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">לרוב לא נדרש. מעקב. בדוק תרופות (דיגוקסין, חוסמי בטא)</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- 2nd Degree AV Block Type I (Wenckebach) -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-block2">
+								חסם AV דרגה 2 סוג I <span class="en-name">— Mobitz Type I (Wenckebach)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- Wenckebach: PR progressively lengthens then drops a QRS -->
+									<polyline fill="none" stroke="#4338ca" stroke-width="2"
+										points="0,40 20,40 28,35 38,40 42,42 45,60 48,10 51,55 54,40 70,40
+										90,40 98,35 115,40 119,42 122,60 125,10 128,55 131,40 150,40
+										170,40 178,35 200,40 204,42 207,60 210,10 213,55 216,40 235,40
+										255,40 263,35 290,40 310,40
+										330,40 338,35 348,40 352,42 355,60 358,10 361,55 364,40 380,40
+										400,40 408,35 425,40 429,42 432,60 435,10 438,55 441,40 460,40
+										480,40 488,35 510,40 514,42 517,60 520,10 523,55 526,40 545,40
+										565,40 573,35 600,40" />
+									<text x="265" y="15" font-size="10" fill="#4338ca" font-weight="bold">↓ QRS חסר</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">ECG</td><td class="value-col">PR מתארך בהדרגה → QRS נושר → מחזור חוזר</td></tr>
+									<tr><td class="label-col">משמעות</td><td class="value-col">חסם ב-AV node. לרוב שפיר</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">לרוב לא נדרש. Atropine אם סימפטומטי</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- 2nd Degree AV Block Type II (Mobitz II) -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-block3">
+								חסם AV דרגה 2 סוג II <span class="en-name">— Mobitz Type II</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- Mobitz II: constant PR, sudden dropped QRS -->
+									<polyline fill="none" stroke="#312e81" stroke-width="2"
+										points="0,40 25,40 35,35 45,40 50,42 53,60 56,10 59,55 62,40 80,38 90,36 100,40
+										125,40 135,35 145,40 150,42 153,60 156,10 159,55 162,40 180,38 190,36 200,40
+										225,40 235,35 245,40 270,40
+										295,40 305,35 315,40 320,42 323,60 326,10 329,55 332,40 350,38 360,36 370,40
+										395,40 405,35 415,40 420,42 423,60 426,10 429,55 432,40 450,38 460,36 470,40
+										495,40 505,35 515,40 540,40
+										565,40 575,35 585,40 590,42 593,60 596,10 599,55 600,40" />
+									<text x="230" y="15" font-size="10" fill="#312e81" font-weight="bold">↓ QRS חסר</text>
+									<text x="500" y="15" font-size="10" fill="#312e81" font-weight="bold">↓ QRS חסר</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">ECG</td><td class="value-col">PR קבוע → QRS נושר פתאום (ללא התארכות PR)</td></tr>
+									<tr><td class="label-col">משמעות</td><td class="value-col" style="color:#dc2626"><strong>חסם מתחת ל-AV node — מסוכן! יכול להתדרדר לחסם מלא</strong></td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col"><strong>קוצב לב (Pacemaker)</strong>. Atropine לא יעיל!</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- 3rd Degree (Complete) AV Block -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored" style="background:#0f172a;">
+								חסם AV מלא (דרגה 3) <span class="en-name">— 3rd Degree (Complete) AV Block</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 80">
+									<!-- Complete block: P waves march through, QRS independent and slow -->
+									<!-- P waves (small bumps) -->
+									<polyline fill="none" stroke="#94a3b8" stroke-width="1.5"
+										points="0,38 40,38 50,33 60,38 110,38 120,33 130,38 180,38 190,33 200,38 250,38 260,33 270,38
+										320,38 330,33 340,38 390,38 400,33 410,38 460,38 470,33 480,38 530,38 540,33 550,38 600,38" />
+									<!-- QRS complexes (wide, slow, independent) -->
+									<polyline fill="none" stroke="#0f172a" stroke-width="2.5"
+										points="0,40 70,40 76,45 80,65 84,5 88,68 92,42 95,40 170,40
+										220,40 226,45 230,65 234,5 238,68 242,42 245,40 370,40
+										376,45 380,65 384,5 388,68 392,42 395,40 520,40
+										526,45 530,65 534,5 538,68 542,42 545,40 600,40" />
+									<text x="5" y="15" font-size="9" fill="#94a3b8">P waves (עצמאיים)</text>
+									<text x="520" y="75" font-size="9" fill="#0f172a">QRS (עצמאי, איטי)</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">קצב</td><td class="value-col">פרוזדורי תקין | חדרי <span class="badge badge-rate" style="background:#0f172a;color:#fff">20-40 bpm</span></td></tr>
+									<tr><td class="label-col">ECG</td><td class="value-col">P ו-QRS עצמאיים לחלוטין (AV dissociation). QRS רחב ואיטי</td></tr>
+									<tr><td class="label-col">סכנה</td><td class="value-col" style="color:#dc2626"><strong>מסכן חיים! סינקופה, דום לב</strong></td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col"><strong>קוצב לב דחוף!</strong> Transcutaneous pacing → Transvenous pacing. Atropine / Epinephrine כגשר</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<!-- end row -->
+
+				<!-- Summary Table -->
+				<div class="card mt-4 mb-5" style="border-radius:10px; overflow:hidden;">
+					<div class="card-header" style="background:#1e293b; color:#fff;">
+						<h4 class="mb-0" style="color:#fff;">טבלה מסכמת — כל הקצבים</h4>
+					</div>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover mb-0" style="text-align:right;">
+								<thead style="background:#f1f5f9;">
+									<tr>
+										<th>קצב</th>
+										<th>קצב לב (BPM)</th>
+										<th>סדיר?</th>
+										<th>P Waves</th>
+										<th>QRS</th>
+										<th>סכנה</th>
+										<th>טיפול עיקרי</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><strong style="color:#10b981">NSR</strong></td>
+										<td>60-100</td>
+										<td>כן</td>
+										<td>תקין, לפני כל QRS</td>
+										<td>צר</td>
+										<td><span class="badge badge-success">תקין</span></td>
+										<td>—</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#ef4444">סינוס טכיקרדיה</strong></td>
+										<td>&gt;100</td>
+										<td>כן</td>
+										<td>תקין</td>
+										<td>צר</td>
+										<td><span class="badge badge-warning">נמוכה</span></td>
+										<td>טיפול בגורם</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#3b82f6">סינוס ברדיקרדיה</strong></td>
+										<td>&lt;60</td>
+										<td>כן</td>
+										<td>תקין</td>
+										<td>צר</td>
+										<td><span class="badge badge-warning">נמוכה-בינונית</span></td>
+										<td>Atropine, Pacing</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#f59e0b">PAC</strong></td>
+										<td>משתנה</td>
+										<td>לא סדיר</td>
+										<td>P שונה, מוקדם</td>
+										<td>צר</td>
+										<td><span class="badge badge-success">שפיר</span></td>
+										<td>לרוב לא נדרש</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#dc2626">AF</strong></td>
+										<td>120-200 (חדרי)</td>
+										<td>לא</td>
+										<td>אין (פרפור)</td>
+										<td>צר</td>
+										<td><span class="badge badge-danger">שבץ!</span></td>
+										<td>חוסמי בטא, נוגדי קרישה</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#e11d48">Flutter</strong></td>
+										<td>~150 (חדרי)</td>
+										<td>כן (לרוב)</td>
+										<td>שיני מסור</td>
+										<td>צר</td>
+										<td><span class="badge badge-danger">בינונית</span></td>
+										<td>שליטה בקצב, אבלציה</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#8b5cf6">SVT</strong></td>
+										<td>100-280</td>
+										<td>כן</td>
+										<td>מוסתר</td>
+										<td>צר</td>
+										<td><span class="badge badge-warning">בינונית</span></td>
+										<td>Vagal → Adenosine</td>
+									</tr>
+									<tr style="background:#fff5f5;">
+										<td><strong style="color:#991b1b">VT</strong></td>
+										<td>100-250</td>
+										<td>כן</td>
+										<td>AV dissociation</td>
+										<td><strong>רחב!</strong></td>
+										<td><span class="badge badge-danger">גבוהה!</span></td>
+										<td>Amiodarone / דפיברילציה</td>
+									</tr>
+									<tr style="background:#fef2f2;">
+										<td><strong style="color:#1e1e1e">VF</strong></td>
+										<td>כאוטי</td>
+										<td>לא</td>
+										<td>אין</td>
+										<td>אין</td>
+										<td><span class="badge badge-danger">דום לב!</span></td>
+										<td><strong>CPR + דפיברילציה!</strong></td>
+									</tr>
+									<tr>
+										<td><strong style="color:#6366f1">חסם AV°1</strong></td>
+										<td>60-100</td>
+										<td>כן</td>
+										<td>תקין, PR ארוך</td>
+										<td>צר</td>
+										<td><span class="badge badge-success">שפיר</span></td>
+										<td>מעקב</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#4338ca">Mobitz I</strong></td>
+										<td>משתנה</td>
+										<td>לא</td>
+										<td>PR מתארך → QRS חסר</td>
+										<td>צר</td>
+										<td><span class="badge badge-warning">נמוכה</span></td>
+										<td>Atropine אם סימפטומטי</td>
+									</tr>
+									<tr style="background:#fff5f5;">
+										<td><strong style="color:#312e81">Mobitz II</strong></td>
+										<td>משתנה</td>
+										<td>לא</td>
+										<td>PR קבוע → QRS חסר</td>
+										<td>צר/רחב</td>
+										<td><span class="badge badge-danger">גבוהה!</span></td>
+										<td><strong>Pacemaker</strong></td>
+									</tr>
+									<tr style="background:#fef2f2;">
+										<td><strong style="color:#0f172a">חסם AV°3</strong></td>
+										<td>20-40 (חדרי)</td>
+										<td>P ו-QRS עצמאיים</td>
+										<td>עצמאי מ-QRS</td>
+										<td><strong>רחב!</strong></td>
+										<td><span class="badge badge-danger">מסכן חיים!</span></td>
+										<td><strong>Pacemaker דחוף!</strong></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- js -->
+		<script src="vendors/scripts/core.js"></script>
+		<script src="vendors/scripts/script.min.js"></script>
+		<script src="vendors/scripts/process.js"></script>
+		<script src="vendors/scripts/layout-settings.js"></script>
+	</body>
+</html>
