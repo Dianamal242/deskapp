@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+	<head>
+		<meta charset="utf-8" />
+		<title>ECG Waveform Anatomy - מבנה גל אק"ג</title>
+
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="vendors/images/apple-touch-icon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="vendors/images/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="vendors/images/favicon-16x16.png"
+		/>
+
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1"
+		/>
+
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="vendors/styles/icon-font.min.css"
+		/>
+		<link rel="stylesheet" type="text/css" href="vendors/styles/style.css" />
+
+		<style>
+			body {
+				direction: rtl;
+				text-align: right;
+				background: #f4f7fa;
+			}
+			.ecg-page-title {
+				text-align: center;
+				padding: 30px 0 10px;
+			}
+			.ecg-page-title h1 {
+				font-size: 30px;
+				font-weight: 800;
+				color: #1e293b;
+			}
+			.ecg-page-title p {
+				color: #64748b;
+				font-size: 16px;
+			}
+			.ecg-diagram-card {
+				background: #fff;
+				border-radius: 16px;
+				box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+				padding: 30px;
+				margin-bottom: 30px;
+				overflow-x: auto;
+			}
+			.ecg-main-svg {
+				display: block;
+				margin: 0 auto;
+				max-width: 100%;
+			}
+
+			/* Explanation cards */
+			.explain-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+				gap: 20px;
+				margin-top: 30px;
+			}
+			.explain-card {
+				background: #fff;
+				border-radius: 12px;
+				box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+				padding: 20px 24px;
+				display: flex;
+				align-items: flex-start;
+				gap: 16px;
+				transition: transform 0.2s, box-shadow 0.2s;
+				border-right: 5px solid #ccc;
+			}
+			.explain-card:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+			}
+			.explain-card .icon-circle {
+				width: 50px;
+				height: 50px;
+				min-width: 50px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 800;
+				font-size: 16px;
+				color: #fff;
+			}
+			.explain-card .card-text h4 {
+				margin: 0 0 6px;
+				font-size: 17px;
+				font-weight: 700;
+			}
+			.explain-card .card-text .he-name {
+				font-size: 13px;
+				color: #94a3b8;
+				margin-bottom: 6px;
+			}
+			.explain-card .card-text p {
+				margin: 0;
+				font-size: 14px;
+				color: #475569;
+				line-height: 1.7;
+			}
+			.explain-card .card-text .values {
+				display: inline-block;
+				background: #f1f5f9;
+				padding: 2px 10px;
+				border-radius: 6px;
+				font-size: 13px;
+				font-weight: 600;
+				color: #334155;
+				margin-top: 6px;
+			}
+
+			/* Colors for each component */
+			.ec-p { border-right-color: #3b82f6; }
+			.ec-p .icon-circle { background: #3b82f6; }
+			.ec-pr-seg { border-right-color: #8b5cf6; }
+			.ec-pr-seg .icon-circle { background: #8b5cf6; }
+			.ec-pr-int { border-right-color: #6366f1; }
+			.ec-pr-int .icon-circle { background: #6366f1; }
+			.ec-q { border-right-color: #f59e0b; }
+			.ec-q .icon-circle { background: #f59e0b; }
+			.ec-r { border-right-color: #ef4444; }
+			.ec-r .icon-circle { background: #ef4444; }
+			.ec-s { border-right-color: #f97316; }
+			.ec-s .icon-circle { background: #f97316; }
+			.ec-qrs { border-right-color: #dc2626; }
+			.ec-qrs .icon-circle { background: #dc2626; }
+			.ec-j { border-right-color: #14b8a6; }
+			.ec-j .icon-circle { background: #14b8a6; }
+			.ec-st { border-right-color: #10b981; }
+			.ec-st .icon-circle { background: #10b981; }
+			.ec-t { border-right-color: #0ea5e9; }
+			.ec-t .icon-circle { background: #0ea5e9; }
+			.ec-u { border-right-color: #a855f7; }
+			.ec-u .icon-circle { background: #a855f7; }
+			.ec-qt { border-right-color: #64748b; }
+			.ec-qt .icon-circle { background: #64748b; }
+
+			.clinical-box {
+				background: #fffbeb;
+				border: 1px solid #fde68a;
+				border-radius: 10px;
+				padding: 16px 20px;
+				margin-top: 8px;
+				font-size: 13px;
+				color: #92400e;
+			}
+			.clinical-box strong {
+				color: #78350f;
+			}
+
+			@media (max-width: 768px) {
+				.explain-grid {
+					grid-template-columns: 1fr;
+				}
+				.ecg-diagram-card {
+					padding: 15px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="pre-loader">
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<img src="vendors/images/deskapp-logo.svg" alt="" />
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>
+
+		<div class="header">
+			<div class="header-left">
+				<div class="menu-icon bi bi-list"></div>
+			</div>
+			<div class="header-right">
+				<div class="user-info-dropdown">
+					<div class="dropdown">
+						<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+							<span class="user-name">ECG Waveform</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="main-container">
+			<div class="xs-pd-20-10 pd-ltr-20">
+
+				<div class="ecg-page-title">
+					<h1>מבנה גל אק"ג — ECG Waveform Anatomy</h1>
+					<p>ציור אינטראקטיבי של מחזור לב אחד עם הסבר מפורט לכל רכיב</p>
+				</div>
+
+				<!-- Main ECG Diagram -->
+				<div class="ecg-diagram-card">
+					<svg class="ecg-main-svg" viewBox="0 0 1000 620" width="960" height="600">
+						<defs>
+							<!-- Grid pattern -->
+							<pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+								<path d="M 20 0 L 0 0 0 20" fill="none" stroke="#fce7e7" stroke-width="0.5"/>
+							</pattern>
+							<pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+								<rect width="100" height="100" fill="url(#smallGrid)"/>
+								<path d="M 100 0 L 0 0 0 100" fill="none" stroke="#f9d4d4" stroke-width="1"/>
+							</pattern>
+							<!-- Arrow marker -->
+							<marker id="arrowR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+								<path d="M0,0 L8,3 L0,6" fill="none" stroke="#94a3b8" stroke-width="1"/>
+							</marker>
+							<marker id="arrowL" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+								<path d="M8,0 L0,3 L8,6" fill="none" stroke="#94a3b8" stroke-width="1"/>
+							</marker>
+							<marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+								<path d="M0,0 L8,3 L0,6" fill="none" stroke="#ef4444" stroke-width="1"/>
+							</marker>
+							<marker id="arrowLRed" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+								<path d="M8,0 L0,3 L8,6" fill="none" stroke="#ef4444" stroke-width="1"/>
+							</marker>
+						</defs>
+
+						<!-- Background grid -->
+						<rect width="1000" height="620" fill="url(#grid)" rx="12"/>
+						<rect width="1000" height="620" fill="none" stroke="#e2e8f0" stroke-width="2" rx="12"/>
+
+						<!-- Baseline -->
+						<line x1="30" y1="340" x2="970" y2="340" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="6,4"/>
+
+						<!-- ============================================ -->
+						<!-- THE ECG WAVEFORM - single cardiac cycle      -->
+						<!-- ============================================ -->
+
+						<!-- Leading baseline -->
+						<polyline fill="none" stroke="#1e40af" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								30,340
+								100,340
+								110,340
+							"/>
+
+						<!-- P wave -->
+						<polyline fill="none" stroke="#3b82f6" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								110,340
+								125,335
+								140,318
+								160,300
+								175,298
+								190,300
+								210,318
+								225,335
+								240,340
+							"/>
+						<!-- P wave fill (subtle) -->
+						<path d="M110,340 Q140,318 175,298 Q210,318 240,340 Z" fill="#3b82f620" />
+
+						<!-- PR segment (flat) -->
+						<polyline fill="none" stroke="#8b5cf6" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								240,340
+								280,340
+								310,340
+							"/>
+
+						<!-- Q wave (small dip) -->
+						<polyline fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								310,340
+								318,345
+								325,365
+								330,370
+								335,365
+								340,340
+							"/>
+
+						<!-- R wave (tall spike) -->
+						<polyline fill="none" stroke="#ef4444" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								340,340
+								350,310
+								360,250
+								370,180
+								380,120
+								390,80
+								400,60
+								405,55
+								410,60
+								415,80
+								420,120
+								430,180
+								440,250
+								450,310
+								455,330
+								460,340
+							"/>
+
+						<!-- S wave (dip below) -->
+						<polyline fill="none" stroke="#f97316" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								460,340
+								465,355
+								470,380
+								475,395
+								478,400
+								482,395
+								488,380
+								493,360
+								498,345
+								505,340
+							"/>
+
+						<!-- J point marker -->
+						<circle cx="505" cy="340" r="5" fill="#14b8a6" stroke="#fff" stroke-width="2"/>
+
+						<!-- ST segment -->
+						<polyline fill="none" stroke="#10b981" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								505,340
+								520,339
+								540,338
+								560,337
+								580,336
+								595,335
+							"/>
+
+						<!-- T wave -->
+						<polyline fill="none" stroke="#0ea5e9" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								595,335
+								610,330
+								625,318
+								645,295
+								665,280
+								680,276
+								695,280
+								715,295
+								730,318
+								745,330
+								760,338
+								770,340
+							"/>
+						<!-- T wave fill (subtle) -->
+						<path d="M595,340 Q645,295 680,276 Q715,295 770,340 Z" fill="#0ea5e920"/>
+
+						<!-- Brief flat -->
+						<polyline fill="none" stroke="#1e40af" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								770,340
+								790,340
+								800,340
+							"/>
+
+						<!-- U wave (small) -->
+						<polyline fill="none" stroke="#a855f7" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								800,340
+								810,338
+								820,332
+								830,328
+								840,326
+								850,328
+								860,332
+								870,338
+								880,340
+							"/>
+
+						<!-- Trailing baseline -->
+						<polyline fill="none" stroke="#1e40af" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"
+							points="
+								880,340
+								920,340
+								970,340
+							"/>
+
+
+						<!-- ============================================ -->
+						<!-- LABELS ON THE WAVEFORM                       -->
+						<!-- ============================================ -->
+
+						<!-- P label -->
+						<text x="175" y="278" text-anchor="middle" font-size="20" font-weight="800" fill="#3b82f6">P</text>
+						<!-- Small Hebrew label -->
+						<text x="175" y="262" text-anchor="middle" font-size="11" fill="#3b82f6">גל</text>
+
+						<!-- Q label -->
+						<text x="330" y="395" text-anchor="middle" font-size="16" font-weight="800" fill="#f59e0b">Q</text>
+
+						<!-- R label -->
+						<text x="405" y="40" text-anchor="middle" font-size="22" font-weight="800" fill="#ef4444">R</text>
+
+						<!-- S label -->
+						<text x="478" y="425" text-anchor="middle" font-size="16" font-weight="800" fill="#f97316">S</text>
+
+						<!-- J point label -->
+						<text x="505" y="322" text-anchor="middle" font-size="12" font-weight="700" fill="#14b8a6">J point</text>
+						<text x="505" y="310" text-anchor="middle" font-size="10" fill="#14b8a6">נקודת</text>
+
+						<!-- T label -->
+						<text x="680" y="258" text-anchor="middle" font-size="20" font-weight="800" fill="#0ea5e9">T</text>
+						<text x="680" y="243" text-anchor="middle" font-size="11" fill="#0ea5e9">גל</text>
+
+						<!-- U label -->
+						<text x="840" y="310" text-anchor="middle" font-size="16" font-weight="800" fill="#a855f7">U</text>
+						<text x="840" y="296" text-anchor="middle" font-size="11" fill="#a855f7">גל</text>
+
+
+						<!-- ============================================ -->
+						<!-- INTERVAL / SEGMENT MARKERS                   -->
+						<!-- ============================================ -->
+
+						<!-- P wave bracket (top) -->
+						<line x1="110" y1="240" x2="110" y2="250" stroke="#3b82f6" stroke-width="1.5"/>
+						<line x1="240" y1="240" x2="240" y2="250" stroke="#3b82f6" stroke-width="1.5"/>
+						<line x1="110" y1="245" x2="240" y2="245" stroke="#3b82f6" stroke-width="1.5"
+							marker-start="url(#arrowLRed)" marker-end="url(#arrowRed)"/>
+						<text x="175" y="237" text-anchor="middle" font-size="13" font-weight="600" fill="#3b82f6">P wave</text>
+
+						<!-- PR segment bracket -->
+						<line x1="240" y1="430" x2="240" y2="440" stroke="#8b5cf6" stroke-width="1.5"/>
+						<line x1="310" y1="430" x2="310" y2="440" stroke="#8b5cf6" stroke-width="1.5"/>
+						<line x1="240" y1="435" x2="310" y2="435" stroke="#8b5cf6" stroke-width="1.5"/>
+						<text x="275" y="455" text-anchor="middle" font-size="12" font-weight="600" fill="#8b5cf6">PR segment</text>
+						<text x="275" y="470" text-anchor="middle" font-size="10" fill="#8b5cf6">מקטע PR</text>
+
+						<!-- PR interval bracket (bottom) -->
+						<line x1="110" y1="485" x2="110" y2="500" stroke="#6366f1" stroke-width="1.5"/>
+						<line x1="340" y1="485" x2="340" y2="500" stroke="#6366f1" stroke-width="1.5"/>
+						<line x1="110" y1="492" x2="340" y2="492" stroke="#6366f1" stroke-width="2"/>
+						<text x="225" y="515" text-anchor="middle" font-size="14" font-weight="700" fill="#6366f1">PR interval</text>
+						<text x="225" y="530" text-anchor="middle" font-size="11" fill="#6366f1">מרווח PR — ‏0.12-0.20 שנ'</text>
+
+						<!-- QRS complex bracket -->
+						<line x1="310" y1="535" x2="310" y2="550" stroke="#dc2626" stroke-width="1.5"/>
+						<line x1="505" y1="535" x2="505" y2="550" stroke="#dc2626" stroke-width="1.5"/>
+						<line x1="310" y1="542" x2="505" y2="542" stroke="#dc2626" stroke-width="2"/>
+						<text x="407" y="565" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">QRS complex</text>
+						<text x="407" y="580" text-anchor="middle" font-size="11" fill="#dc2626">קומפלקס QRS — ‏0.06-0.12 שנ'</text>
+
+						<!-- ST segment bracket (top) -->
+						<line x1="505" y1="300" x2="505" y2="310" stroke="#10b981" stroke-width="1.5"/>
+						<line x1="595" y1="300" x2="595" y2="310" stroke="#10b981" stroke-width="1.5"/>
+						<line x1="505" y1="305" x2="595" y2="305" stroke="#10b981" stroke-width="1.5"/>
+						<text x="550" y="295" text-anchor="middle" font-size="12" font-weight="600" fill="#10b981">ST segment</text>
+						<text x="550" y="280" text-anchor="middle" font-size="10" fill="#10b981">מקטע ST</text>
+
+						<!-- T wave bracket (top) -->
+						<line x1="595" y1="230" x2="595" y2="240" stroke="#0ea5e9" stroke-width="1.5"/>
+						<line x1="770" y1="230" x2="770" y2="240" stroke="#0ea5e9" stroke-width="1.5"/>
+						<line x1="595" y1="235" x2="770" y2="235" stroke="#0ea5e9" stroke-width="1.5"/>
+						<text x="682" y="225" text-anchor="middle" font-size="13" font-weight="600" fill="#0ea5e9">T wave</text>
+
+						<!-- U wave bracket -->
+						<line x1="800" y1="300" x2="800" y2="310" stroke="#a855f7" stroke-width="1.5"/>
+						<line x1="880" y1="300" x2="880" y2="310" stroke="#a855f7" stroke-width="1.5"/>
+						<line x1="800" y1="305" x2="880" y2="305" stroke="#a855f7" stroke-width="1.5"/>
+						<text x="840" y="295" text-anchor="middle" font-size="12" font-weight="600" fill="#a855f7">U wave</text>
+
+						<!-- QT interval bracket (very bottom) -->
+						<line x1="310" y1="590" x2="310" y2="605" stroke="#64748b" stroke-width="1.5"/>
+						<line x1="770" y1="590" x2="770" y2="605" stroke="#64748b" stroke-width="1.5"/>
+						<line x1="310" y1="597" x2="770" y2="597" stroke="#64748b" stroke-width="2"/>
+						<text x="540" y="617" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">QT interval</text>
+
+						<!-- Baseline label -->
+						<text x="55" y="335" text-anchor="middle" font-size="10" fill="#94a3b8">Baseline</text>
+						<text x="55" y="348" text-anchor="middle" font-size="9" fill="#94a3b8">קו בסיס</text>
+
+					</svg>
+				</div>
+
+				<!-- Explanation Cards -->
+				<div class="explain-grid">
+
+					<!-- P Wave -->
+					<div class="explain-card ec-p">
+						<div class="icon-circle">P</div>
+						<div class="card-text">
+							<h4>גל P — P Wave</h4>
+							<div class="he-name">דה-פולריזציה של הפרוזדורים</div>
+							<p>
+								מייצג את ההתכווצות החשמלית של שני הפרוזדורים (עליות הלב).
+								הדחף החשמלי מתחיל בצומת ה-SA ומתפשט דרך דפנות הפרוזדורים.
+								גל P תקין הוא חיובי ב-Lead II, קטן וחלק.
+							</p>
+							<span class="values">משך: &lt;0.12 שנ' | גובה: &lt;2.5mm</span>
+							<div class="clinical-box">
+								<strong>קליני:</strong> גל P רחב → הגדלת פרוזדור שמאל (P mitrale).
+								גל P גבוה ומחודד → הגדלת פרוזדור ימין (P pulmonale).
+								היעלמות גלי P → פרפור פרוזדורים (AF).
+							</div>
+						</div>
+					</div>
+
+					<!-- PR Segment -->
+					<div class="explain-card ec-pr-seg">
+						<div class="icon-circle" style="font-size:11px;">PR<br>seg</div>
+						<div class="card-text">
+							<h4>מקטע PR — PR Segment</h4>
+							<div class="he-name">השהיה בצומת AV</div>
+							<p>
+								הקו השטוח מסוף גל P עד תחילת QRS.
+								מייצג את הזמן שבו הדחף עובר דרך צומת ה-AV,
+								צרור His, ענפי הצרור (Bundle Branches), ורשת Purkinje — ממש לפני התכווצות החדרים.
+								ההשהיה הזו חיונית כדי לאפשר לפרוזדורים לסיים לרוקן דם לחדרים.
+							</p>
+						</div>
+					</div>
+
+					<!-- PR Interval -->
+					<div class="explain-card ec-pr-int">
+						<div class="icon-circle" style="font-size:11px;">PR<br>int</div>
+						<div class="card-text">
+							<h4>מרווח PR — PR Interval</h4>
+							<div class="he-name">מתחילת P עד תחילת QRS</div>
+							<p>
+								כולל את גל P + מקטע PR יחד.
+								מייצג את כל הזמן מתחילת דה-פולריזציה של הפרוזדורים
+								ועד תחילת דה-פולריזציה של החדרים.
+								נמדד מתחילת גל P עד תחילת גל Q (או R אם אין Q).
+							</p>
+							<span class="values">תקין: 0.12–0.20 שנ' (3-5 משבצות קטנות)</span>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								PR &gt; 0.20 שנ' → חסם AV דרגה 1.
+								PR קצר &lt; 0.12 שנ' → תסמונת WPW (מסלול עוקף).
+								PR משתנה → חסם AV דרגה 2.
+							</div>
+						</div>
+					</div>
+
+					<!-- Q Wave -->
+					<div class="explain-card ec-q">
+						<div class="icon-circle">Q</div>
+						<div class="card-text">
+							<h4>גל Q — Q Wave</h4>
+							<div class="he-name">דה-פולריזציה ראשונית של הספטום</div>
+							<p>
+								הסטייה השלילית הראשונה של קומפלקס QRS (כלפי מטה).
+								מייצג דה-פולריזציה של המחיצה הבין-חדרית (ספטום) משמאל לימין.
+								גלי Q קטנים ("ספטליים") הם תקינים ב-I, aVL, V5, V6.
+							</p>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								גלי Q פתולוגיים (רחבים &gt;0.04 שנ', עמוקים &gt;25% מגובה R) →
+								סימן לאוטם שריר הלב ישן (MI). "Q waves of infarction".
+							</div>
+						</div>
+					</div>
+
+					<!-- R Wave -->
+					<div class="explain-card ec-r">
+						<div class="icon-circle">R</div>
+						<div class="card-text">
+							<h4>גל R — R Wave</h4>
+							<div class="he-name">דה-פולריזציה עיקרית של החדרים</div>
+							<p>
+								הסטייה החיובית הראשונה (כלפי מעלה) של קומפלקס QRS.
+								זהו הגל הגבוה ביותר ומייצג את ההתכווצות החשמלית המאסיבית
+								של שני החדרים (בעיקר החדר השמאלי, הגדול יותר).
+							</p>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								R גבוה ב-V5,V6 → היפרטרופיה של חדר שמאל (LVH).
+								R גבוה ב-V1 → היפרטרופיה של חדר ימין (RVH).
+								"R wave progression" — R גדל מ-V1 ל-V6 (תקין).
+							</div>
+						</div>
+					</div>
+
+					<!-- S Wave -->
+					<div class="explain-card ec-s">
+						<div class="icon-circle">S</div>
+						<div class="card-text">
+							<h4>גל S — S Wave</h4>
+							<div class="he-name">דה-פולריזציה סופית של החדרים</div>
+							<p>
+								הסטייה השלילית שאחרי גל R. מייצג את סיום דה-פולריזציה
+								של החדרים, במיוחד הבסיס של החדרים ואזורים מאוחרים.
+								עומק ה-S יורד מ-V1 ל-V6 (תקין).
+							</p>
+						</div>
+					</div>
+
+					<!-- QRS Complex -->
+					<div class="explain-card ec-qrs">
+						<div class="icon-circle" style="font-size:12px;">QRS</div>
+						<div class="card-text">
+							<h4>קומפלקס QRS — QRS Complex</h4>
+							<div class="he-name">דה-פולריזציה מלאה של החדרים</div>
+							<p>
+								כולל את גלי Q + R + S יחד. מייצג את כל הדה-פולריזציה
+								של החדרים ונמדד מתחילת Q (או R) עד סוף S.
+								חייב להיות צר כדי שהדחף עובר דרך מערכת ההולכה התקינה.
+							</p>
+							<span class="values">תקין: 0.06–0.12 שנ' (1.5-3 משבצות קטנות)</span>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								QRS רחב &gt;0.12 שנ' → חסם ענף (RBBB/LBBB), טכיקרדיה חדרית,
+								או קצב מקוצב. QRS רחב = הדחף לא עובר דרך המסלול התקין!
+							</div>
+						</div>
+					</div>
+
+					<!-- J Point -->
+					<div class="explain-card ec-j">
+						<div class="icon-circle" style="font-size:12px;">J pt</div>
+						<div class="card-text">
+							<h4>נקודת J — J Point</h4>
+							<div class="he-name">נקודת המפגש בין QRS ל-ST</div>
+							<p>
+								הנקודה המדויקת שבה קומפלקס QRS מסתיים ומקטע ST מתחיל.
+								משמשת כנקודת ייחוס למדידת עליית או ירידת ST.
+							</p>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								עליית J point → יכולה להיות תקינה ("early repolarization")
+								או סימן ל-Brugada syndrome.
+							</div>
+						</div>
+					</div>
+
+					<!-- ST Segment -->
+					<div class="explain-card ec-st">
+						<div class="icon-circle" style="font-size:11px;">ST</div>
+						<div class="card-text">
+							<h4>מקטע ST — ST Segment</h4>
+							<div class="he-name">רה-פולריזציה מוקדמת של החדרים</div>
+							<p>
+								הקו השטוח בין סוף QRS (נקודת J) לתחילת גל T.
+								מייצג את התקופה שבה החדרים עדיין מדופלרזים לפני שמתחילה
+								רה-פולריזציה. בנורמה — שטוח וברמת קו הבסיס.
+							</p>
+							<div class="clinical-box">
+								<strong>קליני — חשוב מאוד!</strong><br>
+								<strong>עליית ST (elevation):</strong> אוטם שריר הלב חריף (STEMI)! או פריקרדיטיס.<br>
+								<strong>ירידת ST (depression):</strong> איסכמיה (חוסר דם ללב), השפעת דיגוקסין.
+							</div>
+						</div>
+					</div>
+
+					<!-- T Wave -->
+					<div class="explain-card ec-t">
+						<div class="icon-circle">T</div>
+						<div class="card-text">
+							<h4>גל T — T Wave</h4>
+							<div class="he-name">רה-פולריזציה של החדרים</div>
+							<p>
+								מייצג את ההתאוששות החשמלית (רה-פולריזציה) של החדרים,
+								כשתאי שריר הלב חוזרים למצב מנוחה. גל T תקין הוא חיובי ברוב הלידים,
+								חלק ומעוגל, וצריך להיות באותו כיוון כמו ה-QRS.
+							</p>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								T הפוך (inverted) → איסכמיה, LVH (strain pattern), PE.<br>
+								T מחודד וגבוה → היפרקלמיה (אשלגן גבוה) — דחוף!<br>
+								T שטוח → היפוקלמיה, תת-פעילות בלוטת התריס.
+							</div>
+						</div>
+					</div>
+
+					<!-- U Wave -->
+					<div class="explain-card ec-u">
+						<div class="icon-circle">U</div>
+						<div class="card-text">
+							<h4>גל U — U Wave</h4>
+							<div class="he-name">רה-פולריזציה מאוחרת</div>
+							<p>
+								גל קטן ונמוך שמופיע אחרי גל T. לא תמיד נראה.
+								ככל הנראה מייצג רה-פולריזציה מאוחרת של סיבי Purkinje
+								או רה-פולריזציה מכנית מאוחרת. בולט יותר ב-V2-V3 ובקצב איטי.
+							</p>
+							<div class="clinical-box">
+								<strong>קליני:</strong>
+								גל U בולט → היפוקלמיה (אשלגן נמוך), תרופות (דיגוקסין).
+								גל U הפוך → איסכמיה.
+							</div>
+						</div>
+					</div>
+
+					<!-- QT Interval -->
+					<div class="explain-card ec-qt">
+						<div class="icon-circle" style="font-size:11px;">QT</div>
+						<div class="card-text">
+							<h4>מרווח QT — QT Interval</h4>
+							<div class="he-name">זמן כולל של דה-פולריזציה + רה-פולריזציה</div>
+							<p>
+								מתחילת QRS עד סוף גל T. מייצג את כל הזמן שלוקח
+								לחדרים להתכווץ ולהתאושש חשמלית. נמדד כ-QTc (מתוקנן לקצב לב)
+								באמצעות נוסחת Bazett: QTc = QT / √RR.
+							</p>
+							<span class="values">תקין: QTc &lt; 440ms (גברים) | &lt; 460ms (נשים)</span>
+							<div class="clinical-box">
+								<strong>קליני — חשוב!</strong><br>
+								<strong>QT ארוך (Long QT):</strong> סכנה ל-Torsades de Pointes (VT פולימורפי) → VF → מוות פתאומי!<br>
+								גורמים: תרופות (Amiodarone, Sotalol, אנטיביוטיקות), היפוקלמיה, היפומגנזמיה, מולד.<br>
+								<strong>QT קצר:</strong> נדיר. היפרקלצמיה, דיגוקסין.
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<!-- end explain-grid -->
+
+				<!-- Conduction Pathway Summary -->
+				<div class="card mt-4 mb-5" style="border-radius:12px; overflow:hidden;">
+					<div class="card-header" style="background:linear-gradient(135deg, #1e40af, #7c3aed); color:#fff;">
+						<h4 class="mb-0" style="color:#fff;">מסלול ההולכה בלב — Cardiac Conduction Pathway</h4>
+					</div>
+					<div class="card-body">
+						<div class="text-center" style="direction:ltr;">
+							<svg viewBox="0 0 800 120" width="780" style="max-width:100%;">
+								<!-- SA Node -->
+								<rect x="10" y="30" width="100" height="60" rx="10" fill="#3b82f6"/>
+								<text x="60" y="55" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">SA Node</text>
+								<text x="60" y="72" text-anchor="middle" fill="#dbeafe" font-size="10">צומת סינוס</text>
+								<!-- Arrow -->
+								<line x1="110" y1="60" x2="145" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowR)"/>
+								<text x="127" y="50" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="600">P wave</text>
+
+								<!-- Atria -->
+								<rect x="150" y="30" width="90" height="60" rx="10" fill="#6366f1"/>
+								<text x="195" y="55" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Atria</text>
+								<text x="195" y="72" text-anchor="middle" fill="#e0e7ff" font-size="10">פרוזדורים</text>
+								<!-- Arrow -->
+								<line x1="240" y1="60" x2="275" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowR)"/>
+								<text x="257" y="50" text-anchor="middle" fill="#8b5cf6" font-size="9" font-weight="600">PR seg</text>
+
+								<!-- AV Node -->
+								<rect x="280" y="30" width="100" height="60" rx="10" fill="#8b5cf6"/>
+								<text x="330" y="55" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">AV Node</text>
+								<text x="330" y="72" text-anchor="middle" fill="#ede9fe" font-size="10">צומת AV</text>
+								<!-- Arrow -->
+								<line x1="380" y1="60" x2="415" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowR)"/>
+								<text x="397" y="50" text-anchor="middle" fill="#a855f7" font-size="9" font-weight="600">השהיה</text>
+
+								<!-- Bundle of His -->
+								<rect x="420" y="30" width="100" height="60" rx="10" fill="#dc2626"/>
+								<text x="470" y="52" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Bundle</text>
+								<text x="470" y="67" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">of His</text>
+								<text x="470" y="82" text-anchor="middle" fill="#fecaca" font-size="9">צרור His</text>
+								<!-- Arrow -->
+								<line x1="520" y1="60" x2="555" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowR)"/>
+
+								<!-- Purkinje -->
+								<rect x="560" y="30" width="100" height="60" rx="10" fill="#ef4444"/>
+								<text x="610" y="55" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Purkinje</text>
+								<text x="610" y="72" text-anchor="middle" fill="#fecaca" font-size="10">סיבי Purkinje</text>
+								<!-- Arrow -->
+								<line x1="660" y1="60" x2="695" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowR)"/>
+								<text x="677" y="50" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">QRS</text>
+
+								<!-- Ventricles -->
+								<rect x="700" y="30" width="90" height="60" rx="10" fill="#1e293b"/>
+								<text x="745" y="55" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Ventricles</text>
+								<text x="745" y="72" text-anchor="middle" fill="#94a3b8" font-size="10">חדרים</text>
+
+								<!-- Bottom labels -->
+								<text x="400" y="115" text-anchor="middle" fill="#64748b" font-size="12" font-weight="600">SA → פרוזדורים → AV (השהיה) → His → Purkinje → חדרים</text>
+							</svg>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- js -->
+		<script src="vendors/scripts/core.js"></script>
+		<script src="vendors/scripts/script.min.js"></script>
+		<script src="vendors/scripts/process.js"></script>
+		<script src="vendors/scripts/layout-settings.js"></script>
+	</body>
+</html>
