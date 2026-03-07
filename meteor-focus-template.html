@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteor Focus — תבנית עיצוב</title>
+  <link rel="stylesheet" href="meteor-focus-style.css">
+  <style>
+    /* Page-specific overrides go here */
+  </style>
+</head>
+<body>
+  <div class="mf-page">
+
+    <!-- ===== HEADER BANNER ===== -->
+    <div class="mf-header">
+      <h1>שם הנושא — כותרת ראשית</h1>
+      <div class="mf-subtitle">תת כותרת | פרטים נוספים</div>
+    </div>
+
+    <!-- ===== STAT BOXES (optional) ===== -->
+    <div class="mf-stats">
+      <div class="mf-stat-box blue">
+        <span class="mf-stat-number">15</span>
+        <span class="mf-stat-label">סוגי חיסונים</span>
+      </div>
+      <div class="mf-stat-box green">
+        <span class="mf-stat-number">9</span>
+        <span class="mf-stat-label">נקודות זמן</span>
+      </div>
+      <div class="mf-stat-box orange">
+        <span class="mf-stat-number">6 שב׳</span>
+        <span class="mf-stat-label">מוקדם ביותר</span>
+      </div>
+      <div class="mf-stat-box purple">
+        <span class="mf-stat-number">כיתה ח׳</span>
+        <span class="mf-stat-label">מאוחר ביותר</span>
+      </div>
+    </div>
+
+    <!-- ===== NOTICE BAR (optional) ===== -->
+    <div class="mf-notice">
+      <strong>שינוי:</strong> החל מ-3.4.22 ועד להודעה חדשה — חיסוני גיל חודשיים ניתנים בגיל 6 שבועות
+    </div>
+
+    <!-- ===== SECTION TITLE ===== -->
+    <div class="mf-section-title">כותרת סקציה</div>
+    <div class="mf-section-subtitle">תיאור קצר של הסקציה</div>
+
+    <!-- ===== TWO COLUMN CARD GRID ===== -->
+    <div class="mf-grid">
+
+      <!-- Card 1: NSR -->
+      <div class="mf-card">
+        <div class="mf-card-header">
+          <h3>NSR — קצב סינוס תקין</h3>
+        </div>
+        <div class="mf-card-body">
+          <div class="mf-ecg-box">
+            <span class="mf-ecg-label">NSR ~75</span>
+            <svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0,30 L30,30 L35,28 L40,32 L45,30 L55,30 L58,10 L61,50 L64,25 L70,30 L100,30
+                       L130,30 L135,28 L140,32 L145,30 L155,30 L158,10 L161,50 L164,25 L170,30 L200,30
+                       L230,30 L235,28 L240,32 L245,30 L255,30 L258,10 L261,50 L264,25 L270,30 L300,30
+                       L330,30 L335,28 L340,32 L345,30 L355,30 L358,10 L361,50 L364,25 L370,30 L400,30"
+                    fill="none" stroke="#2c3e8c" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">60-100 bpm, סדיר</span>
+            <span class="mf-info-label">קצב</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">P ברורים, P לפני כל QRS, P-QRS-T</span>
+            <span class="mf-info-label">ECG</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">קצב ייחוס תקין</span>
+            <span class="mf-info-label">משמעות</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Sinus Tachy -->
+      <div class="mf-card">
+        <div class="mf-card-header">
+          <h3>סינוס טכיקרדיה</h3>
+        </div>
+        <div class="mf-card-body">
+          <div class="mf-ecg-box">
+            <span class="mf-ecg-label">bpm 120~</span>
+            <svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0,30 L20,30 L23,28 L26,32 L29,30 L35,30 L37,10 L39,50 L41,25 L45,30 L65,30
+                       L68,28 L71,32 L74,30 L80,30 L82,10 L84,50 L86,25 L90,30 L110,30
+                       L113,28 L116,32 L119,30 L125,30 L127,10 L129,50 L131,25 L135,30 L155,30
+                       L158,28 L161,32 L164,30 L170,30 L172,10 L174,50 L176,25 L180,30 L200,30
+                       L203,28 L206,32 L209,30 L215,30 L217,10 L219,50 L221,25 L225,30 L245,30
+                       L248,28 L251,32 L254,30 L260,30 L262,10 L264,50 L266,25 L270,30 L290,30
+                       L293,28 L296,32 L299,30 L305,30 L307,10 L309,50 L311,25 L315,30 L335,30
+                       L338,28 L341,32 L344,30 L350,30 L352,10 L354,50 L356,25 L360,30 L400,30"
+                    fill="none" stroke="#e74c3c" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value"><span class="highlight">bpm 100&lt;</span>, סדיר</span>
+            <span class="mf-info-label">קצב</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">מורפולוגיה תקינה, קומפלקסים צפופים</span>
+            <span class="mf-info-label">ECG</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">טפל בגורם הבסיסי (חום, כאב, אנמיה, חרדה)</span>
+            <span class="mf-info-label">טיפול</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Sinus Brady -->
+      <div class="mf-card">
+        <div class="mf-card-header">
+          <h3>סינוס ברדיקרדיה</h3>
+        </div>
+        <div class="mf-card-body">
+          <div class="mf-ecg-box">
+            <span class="mf-ecg-label">Sinus Brady</span>
+            <svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0,30 L60,30 L63,28 L66,32 L69,30 L80,30 L83,10 L86,50 L89,25 L95,30
+                       L155,30 L158,28 L161,32 L164,30 L175,30 L178,10 L181,50 L184,25 L190,30
+                       L250,30 L253,28 L256,32 L259,30 L270,30 L273,10 L276,50 L279,25 L285,30
+                       L345,30 L348,28 L351,32 L354,30 L365,30 L368,10 L371,50 L374,25 L380,30 L400,30"
+                    fill="none" stroke="#2c3e8c" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value"><span class="highlight">bpm 60&gt;</span>, סדיר</span>
+            <span class="mf-info-label">קצב</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">מורפולוגיה תקינה, מרווחים רחוקים</span>
+            <span class="mf-info-label">ECG</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value"><span class="drug">Atropine IV</span> ← נוזלים ← Pacing ← O₂. מנת יתר בטא: <span class="drug">Glucagon</span></span>
+            <span class="mf-info-label">טיפול</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: AF -->
+      <div class="mf-card">
+        <div class="mf-card-header">
+          <h3>AF — פרפור פרוזדורים</h3>
+        </div>
+        <div class="mf-card-body">
+          <div class="mf-ecg-box">
+            <span class="mf-ecg-label">AF</span>
+            <svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0,30 L5,29 L8,31 L11,28 L14,32 L17,29 L20,31 L23,28 L26,30 L30,30
+                       L33,8 L36,52 L39,24 L43,30 L48,29 L51,31 L54,28 L60,32 L63,29 L66,31
+                       L69,28 L72,31 L75,29 L80,30 L83,12 L86,48 L89,26 L93,30
+                       L97,29 L100,31 L104,28 L108,32 L112,29 L120,30 L123,9 L126,51 L129,23 L133,30
+                       L138,31 L142,28 L146,32 L150,29 L155,31 L158,28 L162,31 L166,29 L172,30
+                       L175,10 L178,50 L181,25 L185,30
+                       L190,29 L195,31 L200,28 L205,32 L210,29 L215,30 L218,11 L221,49 L224,26 L230,30
+                       L235,31 L240,28 L248,32 L255,30 L258,7 L261,53 L264,24 L270,30
+                       L278,29 L285,31 L290,30 L295,11 L298,49 L301,25 L308,30
+                       L315,29 L320,31 L325,28 L330,32 L340,30 L343,9 L346,51 L349,26 L355,30
+                       L362,29 L368,31 L375,28 L382,30 L388,31 L395,29 L400,30"
+                    fill="none" stroke="#e67e22" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">פרוזדורי <span class="highlight">350-600</span> | חדרי 120-200, לא סדיר</span>
+            <span class="mf-info-label">קצב</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">אין P, קו בסיס גלי (f waves), R-R לא סדיר</span>
+            <span class="mf-info-label">ECG</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value"><span class="important">PE ,שבץ ,DVT</span> — חובה נוגדי קרישה (DOACs/Warfarin)</span>
+            <span class="mf-info-label">סיכון</span>
+          </div>
+          <div class="mf-info-row">
+            <span class="mf-info-value">Rate: <span class="drug">Diltiazem, Amiodarone, BB</span> | Rhythm: Cardioversion, RCA</span>
+            <span class="mf-info-label">טיפול</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .mf-grid -->
+
+    <!-- ===== FULL WIDTH DARK BOX ===== -->
+    <div class="mf-blackbox">
+      <h3>דפיברילציה VS אסיסטולה — BLACK BOX</h3>
+      <p>אסיסטולה = אין חשמל → <strong>אין לדפברל!</strong> CPR + Epinephrine בלבד.</p>
+      <p>VF/pVT = כאוס חשמלי → דפיברילציה מיידית (א-סינכרונית) + CPR + Epinephrine.</p>
+    </div>
+
+    <!-- ===== SAMPLE TABLE ===== -->
+    <div class="mf-section-title">לוח לדוגמה</div>
+    <div class="mf-table-wrapper">
+      <table class="mf-table">
+        <thead>
+          <tr>
+            <th>כיתה ח׳</th>
+            <th>שנה</th>
+            <th>18 חודשים</th>
+            <th>12 חודש</th>
+            <th>6 חודש</th>
+            <th>4 חודש</th>
+            <th>2 חודש</th>
+            <th>יום לידה</th>
+            <th>החיסון</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td>HBV — דלקת כבד B</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td></td>
+            <td>IPV — שיתוק ילדים</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><span class="mf-check"></span></td>
+            <td></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td><span class="mf-check"></span></td>
+            <td></td>
+            <td>DTaP — צפדת-אסכרה-שעלת</td>
+          </tr>
+          <tr>
+            <td><span class="mf-check"></span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>HPV — פפילומה**</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== LEGEND BOX ===== -->
+    <div class="mf-legend">
+      <h4>מקרא קיצורים</h4>
+      <div class="mf-legend-grid">
+        <div class="mf-legend-item">
+          <span class="abbr">HBV</span>
+          <span>דלקת כבד B</span>
+        </div>
+        <div class="mf-legend-item">
+          <span class="abbr">IPV</span>
+          <span>שיתוק ילדים (מומת)</span>
+        </div>
+        <div class="mf-legend-item">
+          <span class="abbr">DTaP</span>
+          <span>צפדת-אסכרה-שעלת (ילדים)</span>
+        </div>
+        <div class="mf-legend-item">
+          <span class="abbr">MMR</span>
+          <span>חצבת-חזרת-אדמת</span>
+        </div>
+        <div class="mf-legend-item">
+          <span class="abbr">HPV</span>
+          <span>פפילומה באדם</span>
+        </div>
+        <div class="mf-legend-item">
+          <span class="abbr">Hib</span>
+          <span>המופילוס אינפלואנזה b</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NOTES ===== -->
+    <div class="mf-notes">
+      <h4>הערות חשובות</h4>
+      <p><span class="highlight">HPV</span> — ניתן ב-2 מנות בכיתה ח׳. | <strong>RSV</strong> — לכל התינוקות בהתאם לעונה ולתאריך הלידה.</p>
+      <p><strong>שפעת</strong> — מגיל 6 חודשים ובכיתות ב׳-ד׳ בבית הספר.</p>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="mf-footer">
+      ☎ 054-3733033 | © Meteor Focus
+    </div>
+
+  </div><!-- end .mf-page -->
+</body>
+</html>
