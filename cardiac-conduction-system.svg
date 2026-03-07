@@ -1,0 +1,190 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" width="800" height="900">
+  <defs>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#c0392b;stop-opacity:0.08"/>
+    </linearGradient>
+    <linearGradient id="pulseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2ecc71;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.2"/>
+    </filter>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#27ae60"/>
+    </marker>
+    <marker id="arrowYellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f39c12"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="900" fill="#fdfefe" rx="15"/>
+
+  <!-- Title -->
+  <text x="400" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#2c3e50">Cardiac Conduction System</text>
+  <text x="400" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#7f8c8d">מערכת ההולכה החשמלית של הלב</text>
+
+  <!-- Heart shape outline -->
+  <path d="M 400 820
+           C 400 820, 120 620, 120 380
+           C 120 260, 200 160, 300 160
+           C 350 160, 380 190, 400 220
+           C 420 190, 450 160, 500 160
+           C 600 160, 680 260, 680 380
+           C 680 620, 400 820, 400 820 Z"
+        fill="url(#heartGrad)" stroke="#e74c3c" stroke-width="3" opacity="0.9"/>
+
+  <!-- Septum (dividing line) -->
+  <line x1="400" y1="240" x2="400" y2="720" stroke="#c0392b" stroke-width="2" stroke-dasharray="8,4" opacity="0.4"/>
+
+  <!-- Chamber labels -->
+  <text x="300" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#e74c3c" opacity="0.6">Left Atrium</text>
+  <text x="300" y="328" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e74c3c" opacity="0.5">עלייה שמאלית</text>
+  <text x="500" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#e74c3c" opacity="0.6">Right Atrium</text>
+  <text x="500" y="328" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e74c3c" opacity="0.5">עלייה ימנית</text>
+  <text x="300" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#e74c3c" opacity="0.6">Left Ventricle</text>
+  <text x="300" y="598" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e74c3c" opacity="0.5">חדר שמאלי</text>
+  <text x="500" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#e74c3c" opacity="0.6">Right Ventricle</text>
+  <text x="500" y="598" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e74c3c" opacity="0.5">חדר ימני</text>
+
+  <!-- AV valve line -->
+  <line x1="180" y1="430" x2="620" y2="430" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.3"/>
+
+  <!-- ============ CONDUCTION PATHWAY ============ -->
+
+  <!-- 1. SA Node -->
+  <circle cx="520" cy="210" r="22" fill="#2ecc71" stroke="#27ae60" stroke-width="3" filter="url(#glow)"/>
+  <text x="520" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">SA</text>
+
+  <!-- SA Node label -->
+  <rect x="580" y="180" width="185" height="55" rx="8" fill="white" stroke="#2ecc71" stroke-width="2" filter="url(#shadow)"/>
+  <text x="672" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">SA Node (Sinoatrial)</text>
+  <text x="672" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#27ae60">Pacemaker - 60-100 bpm</text>
+  <text x="672" y="232" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#7f8c8d">קוצב הלב הטבעי</text>
+  <line x1="542" y1="210" x2="580" y2="207" stroke="#2ecc71" stroke-width="1.5"/>
+
+  <!-- 2. Internodal pathways (SA to AV) -->
+  <path d="M 520 232 C 520 280, 480 320, 430 370" stroke="#2ecc71" stroke-width="3" fill="none" stroke-dasharray="6,3" marker-end="url(#arrowGreen)" opacity="0.8"/>
+  <!-- Atrial conduction wave -->
+  <path d="M 520 232 C 500 260, 380 280, 300 270" stroke="#2ecc71" stroke-width="2" fill="none" stroke-dasharray="4,3" opacity="0.5"/>
+  <path d="M 520 232 C 540 280, 560 320, 450 370" stroke="#2ecc71" stroke-width="2" fill="none" stroke-dasharray="4,3" opacity="0.4"/>
+
+  <!-- Internodal pathway label -->
+  <text x="540" y="310" text-anchor="start" font-family="Arial, sans-serif" font-size="11" fill="#27ae60" font-style="italic">Internodal</text>
+  <text x="540" y="324" text-anchor="start" font-family="Arial, sans-serif" font-size="11" fill="#27ae60" font-style="italic">Pathways</text>
+  <text x="540" y="338" text-anchor="start" font-family="Arial, sans-serif" font-size="10" fill="#7f8c8d">מסלולים בין-צומתיים</text>
+
+  <!-- 3. AV Node -->
+  <circle cx="420" cy="390" r="20" fill="#f39c12" stroke="#e67e22" stroke-width="3" filter="url(#glow)"/>
+  <text x="420" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">AV</text>
+
+  <!-- AV Node label -->
+  <rect x="130" y="365" width="200" height="55" rx="8" fill="white" stroke="#f39c12" stroke-width="2" filter="url(#shadow)"/>
+  <text x="230" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">AV Node (Atrioventricular)</text>
+  <text x="230" y="403" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e67e22">Delay - 40-60 bpm</text>
+  <text x="230" y="417" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#7f8c8d">צומת פרוזדורי-חדרי (השהיה)</text>
+  <line x1="400" y1="390" x2="330" y2="390" stroke="#f39c12" stroke-width="1.5"/>
+
+  <!-- 4. Bundle of His -->
+  <path d="M 420 410 L 400 470" stroke="#e67e22" stroke-width="4" fill="none" marker-end="url(#arrowYellow)"/>
+
+  <rect rx="12" ry="12" x="370" y="470" width="60" height="30" fill="#e67e22" stroke="#d35400" stroke-width="2" filter="url(#glow)"/>
+  <text x="400" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">His</text>
+
+  <!-- Bundle of His label -->
+  <rect x="480" y="455" width="175" height="50" rx="8" fill="white" stroke="#e67e22" stroke-width="2" filter="url(#shadow)"/>
+  <text x="567" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">Bundle of His</text>
+  <text x="567" y="493" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e67e22">צרור היס</text>
+  <line x1="430" y1="485" x2="480" y2="478" stroke="#e67e22" stroke-width="1.5"/>
+
+  <!-- 5. Left Bundle Branch -->
+  <path d="M 390 500 C 370 530, 330 570, 300 640" stroke="#3498db" stroke-width="3.5" fill="none"/>
+  <!-- Right Bundle Branch -->
+  <path d="M 410 500 C 430 530, 470 570, 500 640" stroke="#9b59b6" stroke-width="3.5" fill="none"/>
+
+  <!-- Left Bundle label -->
+  <rect x="140" y="520" width="160" height="45" rx="8" fill="white" stroke="#3498db" stroke-width="2" filter="url(#shadow)"/>
+  <text x="220" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2c3e50">Left Bundle Branch</text>
+  <text x="220" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#3498db">ענף שמאלי של צרור היס</text>
+  <line x1="300" y1="550" x2="340" y2="560" stroke="#3498db" stroke-width="1.5"/>
+
+  <!-- Right Bundle label -->
+  <rect x="510" y="520" width="170" height="45" rx="8" fill="white" stroke="#9b59b6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="595" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2c3e50">Right Bundle Branch</text>
+  <text x="595" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9b59b6">ענף ימני של צרור היס</text>
+  <line x1="510" y1="545" x2="470" y2="560" stroke="#9b59b6" stroke-width="1.5"/>
+
+  <!-- 6. Purkinje Fibers - Left -->
+  <path d="M 300 640 C 280 660, 240 680, 220 710" stroke="#3498db" stroke-width="2" fill="none"/>
+  <path d="M 300 640 C 290 665, 270 690, 260 720" stroke="#3498db" stroke-width="2" fill="none"/>
+  <path d="M 300 640 C 300 670, 300 700, 300 730" stroke="#3498db" stroke-width="2" fill="none"/>
+  <path d="M 300 640 C 310 665, 330 690, 340 720" stroke="#3498db" stroke-width="2" fill="none"/>
+  <path d="M 300 640 C 320 660, 350 670, 370 690" stroke="#3498db" stroke-width="2" fill="none"/>
+
+  <!-- Purkinje dots - Left -->
+  <circle cx="220" cy="710" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="260" cy="720" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="300" cy="730" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="340" cy="720" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="370" cy="690" r="4" fill="#3498db" opacity="0.7"/>
+
+  <!-- 6. Purkinje Fibers - Right -->
+  <path d="M 500 640 C 520 660, 560 680, 570 710" stroke="#9b59b6" stroke-width="2" fill="none"/>
+  <path d="M 500 640 C 510 665, 530 690, 540 720" stroke="#9b59b6" stroke-width="2" fill="none"/>
+  <path d="M 500 640 C 500 670, 500 700, 500 730" stroke="#9b59b6" stroke-width="2" fill="none"/>
+  <path d="M 500 640 C 490 665, 470 690, 460 720" stroke="#9b59b6" stroke-width="2" fill="none"/>
+  <path d="M 500 640 C 480 660, 450 670, 430 690" stroke="#9b59b6" stroke-width="2" fill="none"/>
+
+  <!-- Purkinje dots - Right -->
+  <circle cx="570" cy="710" r="4" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="540" cy="720" r="4" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="500" cy="730" r="4" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="460" cy="720" r="4" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="430" cy="690" r="4" fill="#9b59b6" opacity="0.7"/>
+
+  <!-- Purkinje Fibers label -->
+  <rect x="130" y="700" width="155" height="45" rx="8" fill="white" stroke="#1abc9c" stroke-width="2" filter="url(#shadow)"/>
+  <text x="207" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2c3e50">Purkinje Fibers</text>
+  <text x="207" y="738" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1abc9c">סיבי פורקינייה - 20-40 bpm</text>
+
+  <!-- ============ LEGEND ============ -->
+  <rect x="50" y="810" width="700" height="75" rx="10" fill="white" stroke="#bdc3c7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="100" y="835" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2c3e50">Signal Flow:</text>
+
+  <circle cx="200" cy="832" r="8" fill="#2ecc71"/>
+  <text x="215" y="836" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">SA Node</text>
+
+  <text x="280" y="836" font-family="Arial, sans-serif" font-size="16" fill="#7f8c8d">→</text>
+
+  <circle cx="310" cy="832" r="8" fill="#f39c12"/>
+  <text x="325" y="836" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">AV Node</text>
+
+  <text x="395" y="836" font-family="Arial, sans-serif" font-size="16" fill="#7f8c8d">→</text>
+
+  <rect x="415" y="824" width="30" height="16" rx="5" fill="#e67e22"/>
+  <text x="430" y="836" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">His</text>
+
+  <text x="460" y="836" font-family="Arial, sans-serif" font-size="16" fill="#7f8c8d">→</text>
+
+  <line x1="480" y1="832" x2="510" y2="832" stroke="#3498db" stroke-width="3"/>
+  <line x1="480" y1="832" x2="510" y2="832" stroke="#9b59b6" stroke-width="3" stroke-dasharray="3,6" stroke-dashoffset="3"/>
+  <text x="520" y="836" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Bundles</text>
+
+  <text x="580" y="836" font-family="Arial, sans-serif" font-size="16" fill="#7f8c8d">→</text>
+
+  <circle cx="605" cy="832" r="4" fill="#3498db"/>
+  <circle cx="615" cy="828" r="4" fill="#9b59b6"/>
+  <circle cx="615" cy="836" r="4" fill="#3498db"/>
+  <text x="628" y="836" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Purkinje</text>
+
+  <text x="400" y="870" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#95a5a6">Electrical impulse travels from the SA node through the conduction system to contract the heart muscle</text>
+</svg>
