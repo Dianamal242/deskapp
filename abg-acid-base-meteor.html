@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מאזן חומצה-בסיס | Meteor Focus</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #2c3e50;
+            line-height: 1.7;
+            padding: 20px;
+        }
+
+        .page {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .main-header {
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4, #14b8a6);
+            padding: 32px 40px 28px;
+            text-align: center;
+            color: #fff;
+        }
+        .main-header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+        .main-header .subtitle {
+            font-size: 15px;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        /* ===== VALUE CARDS ===== */
+        .values-row {
+            display: flex;
+            gap: 14px;
+            padding: 24px 35px 10px;
+            justify-content: center;
+        }
+        .val-card {
+            flex: 1;
+            text-align: center;
+            padding: 18px 12px 14px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .val-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .val-card .value {
+            font-size: 30px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+        .val-card .label {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        .val-card .label sub { font-size: 10px; }
+
+        /* ===== GOLDEN RULE ===== */
+        .golden-rule {
+            margin: 16px 35px 0;
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #fef3c7, #fde68a40);
+            border-right: 4px solid #f59e0b;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+        }
+        .golden-rule strong { color: #b45309; }
+
+        /* ===== CONTENT SECTIONS ===== */
+        .content {
+            padding: 24px 35px 35px;
+        }
+
+        /* Section card */
+        .section {
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            padding: 18px 20px 14px;
+            color: #1e3a5f;
+        }
+        .section-title.blue-bg {
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            color: #1e40af;
+        }
+        .section-body {
+            padding: 20px 28px 24px;
+        }
+
+        /* ===== ABG EXPLANATION ===== */
+        .abg-text {
+            font-size: 14.5px;
+            line-height: 1.8;
+            color: #374151;
+        }
+        .abg-text strong { color: #1e3a5f; }
+
+        .param-list {
+            margin-top: 16px;
+        }
+        .param-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 12px;
+        }
+        .param-row:last-child { border-bottom: none; }
+        .param-name {
+            font-weight: 800;
+            color: #0ea5e9;
+            min-width: 55px;
+            font-size: 15px;
+        }
+        .param-name sub { font-size: 11px; }
+        .param-desc {
+            font-size: 14px;
+            color: #475569;
+        }
+        .param-desc .normal {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        /* ===== STEP SECTION ===== */
+        .step-header {
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            color: #1e40af;
+        }
+
+        /* Flowchart */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin-top: 20px;
+        }
+        .flow-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            width: 100%;
+            max-width: 480px;
+        }
+        .flow-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: #fff;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .flow-num.blue { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+        .flow-content {
+            flex: 1;
+        }
+        .flow-content h4 {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e3a5f;
+            margin-bottom: 2px;
+        }
+        .flow-content p {
+            font-size: 13.5px;
+            color: #64748b;
+        }
+
+        .flow-arrow-down {
+            display: flex;
+            justify-content: center;
+            padding: 6px 0;
+            color: #94a3b8;
+            font-size: 18px;
+            margin-right: 18px;
+        }
+
+        .flow-result {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            width: 100%;
+            max-width: 480px;
+        }
+        .flow-result .flow-content h4 { font-size: 15px; }
+        .flow-result .flow-content .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .tag-red { background: #fee2e2; color: #dc2626; }
+        .tag-blue { background: #dbeafe; color: #2563eb; }
+
+        /* Memory tip box */
+        .tip-box {
+            margin-top: 20px;
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .tip-green {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-right: 4px solid #10b981;
+            color: #065f46;
+        }
+        .tip-green strong { color: #047857; }
+        .tip-yellow {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-right: 4px solid #f59e0b;
+            color: #92400e;
+        }
+        .tip-yellow strong { color: #b45309; }
+        .tip-red {
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            border-right: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        .tip-red strong { color: #dc2626; }
+        .tip-purple {
+            background: linear-gradient(135deg, #faf5ff, #ede9fe);
+            border-right: 4px solid #8b5cf6;
+            color: #5b21b6;
+        }
+        .tip-purple strong { color: #7c3aed; }
+
+        /* ===== TABLE ===== */
+        .disorders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        .disorders-table thead th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            padding: 12px 14px;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 13.5px;
+        }
+        .disorders-table tbody td {
+            padding: 12px 14px;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .disorders-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        .disorders-table .disorder-name {
+            font-weight: 700;
+            text-align: right;
+            font-size: 14px;
+        }
+        .disorders-table .cause {
+            text-align: right;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .disorders-table sub { font-size: 10px; }
+
+        .tr-acid { background: #fef2f2; }
+        .tr-acid .disorder-name { color: #dc2626; }
+        .tr-alk { background: #f0fdf4; }
+        .tr-alk .disorder-name { color: #16a34a; }
+
+        .arrow-up { color: #dc2626; font-weight: 800; }
+        .arrow-down { color: #2563eb; font-weight: 800; }
+
+        /* ===== EXAM HIGHLIGHT ===== */
+        .exam-box {
+            margin-top: 18px;
+            padding: 16px 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #fef2f2, #fecaca50);
+            border: 1.5px solid #fca5a5;
+        }
+        .exam-box p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #7f1d1d;
+        }
+        .exam-box strong { color: #dc2626; }
+        .exam-box .highlight-tag {
+            display: inline-block;
+            background: #fde68a;
+            color: #92400e;
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .exam-banner {
+            margin-top: 16px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #fde68a, #fbbf2440);
+            border-right: 4px solid #f59e0b;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14.5px;
+            color: #92400e;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 24px 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .page { box-shadow: none; border-radius: 0; }
+            .val-card:hover { transform: none; box-shadow: none; }
+        }
+        @media (max-width: 600px) {
+            .values-row { flex-wrap: wrap; padding: 16px 20px 6px; }
+            .val-card { min-width: calc(50% - 10px); }
+            .content { padding: 16px 20px 24px; }
+            .section-body { padding: 16px 18px 20px; }
+            .main-header { padding: 24px 20px 20px; }
+            .main-header h1 { font-size: 24px; }
+            .golden-rule { margin: 12px 20px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <!-- HEADER -->
+    <div class="main-header">
+        <h1>מאזן חומצה-בסיס</h1>
+        <div class="subtitle">סיכום למידה | שלב 1 — ערכים תקינים וזיהוי ההפרעה הראשונית</div>
+    </div>
+
+    <!-- VALUE CARDS -->
+    <div class="values-row">
+        <div class="val-card">
+            <div class="value">7.35-7.45</div>
+            <div class="label">pH תקין</div>
+        </div>
+        <div class="val-card">
+            <div class="value">35-45</div>
+            <div class="label">pCO<sub>2</sub> (mmHg)</div>
+        </div>
+        <div class="val-card">
+            <div class="value">22-26</div>
+            <div class="label">HCO<sub>3</sub> (mEq/L)</div>
+        </div>
+        <div class="val-card">
+            <div class="value">-2 — +2</div>
+            <div class="label">BE (בסיס עודף)</div>
+        </div>
+    </div>
+
+    <!-- GOLDEN RULE -->
+    <div class="golden-rule">
+        <strong>כלל זהב:</strong> תמיד מתחילים מה-pH — הוא שקובע אם מדובר בחמצת או בססת
+    </div>
+
+    <div class="content">
+
+        <!-- WHAT IS ABG -->
+        <div class="section">
+            <div class="section-title">מהי בדיקת גזים בדם עורקי</div>
+            <div class="section-body">
+                <div class="abg-text">
+                    בדיקת <strong>ABG — Arterial Blood Gas</strong> (גזים בדם עורקי) היא בדיקת דם שנלקחת מעורק ומודדת את רמת החומציות (pH), לחץ הפחמן הדו-חמצני (pCO<sub>2</sub>), והביקרבונט (HCO<sub>3</sub>). שלושת הערכים האלה יחד מספרים לנו <strong>אם המאזן חומצה-בסיס בגוף תקין</strong>, ואם לא — מה הסיבה.
+                </div>
+                <div class="param-list">
+                    <div class="param-row">
+                        <div class="param-name">pH</div>
+                        <div class="param-desc">מודד את רמת החומציות בדם. טווח תקין: <span class="normal">7.35–7.45</span></div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">pCO<sub>2</sub></div>
+                        <div class="param-desc">מייצג את <strong>הרכיב הנשימתי</strong> — נשלט על ידי הריאות. תקין: <span class="normal">35–45 mmHg</span></div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">HCO<sub>3</sub></div>
+                        <div class="param-desc">מייצג את <strong>הרכיב המטבולי</strong> — נשלט על ידי הכליות. תקין: <span class="normal">22–26 mEq/L</span></div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">BE</div>
+                        <div class="param-desc"><strong>Base Excess</strong> (בסיס עודף) — מראה עד כמה הצד המטבולי חורג מהנורמה. תקין: <span class="normal">-2 עד +2</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="section">
+            <div class="section-title step-header blue-bg">שלב 1 — זיהוי ההפרעה הראשונית</div>
+            <div class="section-body">
+                <div class="abg-text">
+                    השלב הראשון בניתוח ABG הוא תמיד לבדוק את ה-pH. אם הוא <strong>מתחת ל-7.35</strong> — מדובר בחמצת (<strong style="color:#dc2626">Acidosis</strong>). אם הוא <strong>מעל 7.45</strong> — מדובר בססת (<strong style="color:#2563eb">Alkalosis</strong>). רק אחרי שקבענו חמצת או בססת, עוברים לשלב הבא.
+                </div>
+
+                <div class="flow">
+                    <div class="flow-item">
+                        <div class="flow-num blue">1</div>
+                        <div class="flow-content">
+                            <h4>בדוק את ה-pH</h4>
+                            <p>האם הוא בטווח התקין (7.35–7.45)?</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow-down">&darr;</div>
+
+                    <div class="flow-result">
+                        <div class="flow-num blue">2</div>
+                        <div class="flow-content">
+                            <h4>pH מתחת ל-7.35</h4>
+                            <p>&rarr; <span class="tag tag-red">חמצת (Acidosis)</span> — הדם חומצי מדי</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow-down">&darr;</div>
+
+                    <div class="flow-result">
+                        <div class="flow-num blue">3</div>
+                        <div class="flow-content">
+                            <h4>pH מעל 7.45</h4>
+                            <p>&rarr; <span class="tag tag-blue">בססת (Alkalosis)</span> — הדם בסיסי מדי</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box tip-green">
+                    <strong>איך לזכור:</strong><br>
+                    pH = מד החומציות של הדם. מספר קטן = חומצי יותר (חמצת). מספר גדול = בסיסי יותר (בססת). כמו סולם — מתחת ל-7.35 אתה "נופל" לחמצת, מעל 7.45 אתה "עולה" לבססת.
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="section">
+            <div class="section-title step-header blue-bg">שלב 2 — נשימתי או מטבולי</div>
+            <div class="section-body">
+                <div class="abg-text">
+                    אחרי שקבענו שיש חמצת או בססת, צריך להבין <strong>מאיפה הבעיה מגיעה:</strong> מהריאות (נשימתי) או מהכליות (מטבולי). לשם כך בודקים את ה-pCO<sub>2</sub> ואת ה-HCO<sub>3</sub>.
+                </div>
+
+                <table class="disorders-table">
+                    <thead>
+                        <tr>
+                            <th>ההפרעה</th>
+                            <th>pH</th>
+                            <th>pCO<sub>2</sub></th>
+                            <th>HCO<sub>3</sub></th>
+                            <th>הגורם</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tr-acid">
+                            <td class="disorder-name">חמצת נשימתית</td>
+                            <td><span class="arrow-down">&darr;</span> <strong>&lt;7.35</strong></td>
+                            <td><span class="arrow-up">&uarr;</span> <strong>&gt;45</strong></td>
+                            <td>תקין</td>
+                            <td class="cause">הריאות לא מסלקות מספיק CO<sub>2</sub></td>
+                        </tr>
+                        <tr class="tr-acid">
+                            <td class="disorder-name">חמצת מטבולית</td>
+                            <td><span class="arrow-down">&darr;</span> <strong>&lt;7.35</strong></td>
+                            <td>תקין</td>
+                            <td><span class="arrow-down">&darr;</span> <strong>&lt;22</strong></td>
+                            <td class="cause">הכליות לא שומרות מספיק HCO<sub>3</sub></td>
+                        </tr>
+                        <tr class="tr-alk">
+                            <td class="disorder-name">בססת נשימתית</td>
+                            <td><span class="arrow-up">&uarr;</span> <strong>&gt;7.45</strong></td>
+                            <td><span class="arrow-down">&darr;</span> <strong>&lt;35</strong></td>
+                            <td>תקין</td>
+                            <td class="cause">הריאות מסלקות יותר מדי CO<sub>2</sub></td>
+                        </tr>
+                        <tr class="tr-alk">
+                            <td class="disorder-name">בססת מטבולית</td>
+                            <td><span class="arrow-up">&uarr;</span> <strong>&gt;7.45</strong></td>
+                            <td>תקין</td>
+                            <td><span class="arrow-up">&uarr;</span> <strong>&gt;26</strong></td>
+                            <td class="cause">עודף HCO<sub>3</sub> בגוף</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="tip-box tip-purple" style="margin-top:18px;">
+                    <strong>טיפ לזיכרון:</strong> pCO<sub>2</sub> = ריאות (נשימתי). HCO<sub>3</sub> = כליות (מטבולי). תמיד מחפשים את הערך שמסביר את ה-pH — הוא ה"אשם" בבעיה.
+                </div>
+
+                <div class="exam-box" style="margin-top:14px;">
+                    <p><strong>מלכודת בחינה:</strong> בשאלה שבה <span class="highlight-tag">שני הערכים חריגים</span> (גם pCO<sub>2</sub> וגם HCO<sub>3</sub>) — ה"אשם" הוא זה שהולך <strong>באותו כיוון</strong> של ה-pH. הערך השני הוא פיצוי, ואת זה נלמד בחלק הבא.</p>
+                </div>
+
+                <div class="exam-banner">
+                    דגש מבחן: בחלק הבא נלמד איך לזהות אם יש פיצוי או אין — המקום שבו רוב הסטודנטים טועים
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        054-3733033 | &copy; Meteor Focus
+    </div>
+
+</div>
+
+</body>
+</html>
