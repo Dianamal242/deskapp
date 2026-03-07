@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+	<head>
+		<meta charset="utf-8" />
+		<title>ECG STEMI - אוטם שריר הלב</title>
+
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="vendors/images/apple-touch-icon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="vendors/images/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="vendors/images/favicon-16x16.png"
+		/>
+
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1"
+		/>
+
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="vendors/styles/icon-font.min.css"
+		/>
+		<link rel="stylesheet" type="text/css" href="vendors/styles/style.css" />
+
+		<style>
+			body {
+				direction: rtl;
+				text-align: right;
+			}
+			.ecg-card {
+				border-radius: 10px;
+				overflow: hidden;
+				margin-bottom: 30px;
+				box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+				transition: transform 0.2s;
+			}
+			.ecg-card:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+			}
+			.ecg-card .card-header-colored {
+				padding: 12px 20px;
+				color: #fff;
+				font-size: 18px;
+				font-weight: 700;
+			}
+			.ecg-card .card-header-colored .en-name {
+				font-weight: 400;
+				opacity: 0.9;
+				font-size: 14px;
+			}
+			.ecg-svg-wrap {
+				background: #f9fafb;
+				padding: 15px 10px;
+				border-bottom: 1px solid #eee;
+				text-align: center;
+				position: relative;
+				overflow: hidden;
+			}
+			.ecg-svg-wrap::before {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				background: repeating-linear-gradient(
+					90deg,
+					transparent,
+					transparent 19px,
+					rgba(255,200,200,0.2) 19px,
+					rgba(255,200,200,0.2) 20px
+				),
+				repeating-linear-gradient(
+					0deg,
+					transparent,
+					transparent 19px,
+					rgba(255,200,200,0.2) 19px,
+					rgba(255,200,200,0.2) 20px
+				);
+				pointer-events: none;
+			}
+			.ecg-svg-wrap svg {
+				width: 100%;
+				height: 100px;
+			}
+			.ecg-info {
+				padding: 15px 20px;
+			}
+			.ecg-info table {
+				width: 100%;
+			}
+			.ecg-info table td {
+				padding: 5px 0;
+				vertical-align: top;
+			}
+			.ecg-info table td.label-col {
+				font-weight: 700;
+				width: 80px;
+				color: #333;
+			}
+			.ecg-info table td.value-col {
+				color: #555;
+			}
+			.page-header-ecg {
+				text-align: center;
+				margin-bottom: 30px;
+			}
+			.page-header-ecg h1 {
+				font-size: 28px;
+				font-weight: 800;
+				color: #333;
+			}
+			.page-header-ecg p {
+				color: #888;
+				font-size: 16px;
+			}
+			.bg-anterior { background: #dc2626; }
+			.bg-inferior { background: #b91c1c; }
+			.bg-lateral { background: #991b1b; }
+			.bg-posterior { background: #7f1d1d; }
+			.bg-septal { background: #450a0a; }
+			.bg-rv { background: #9f1239; }
+			.bg-normal-st { background: #10b981; }
+			.bg-nstemi { background: #d97706; }
+
+			.badge-leads {
+				display: inline-block;
+				padding: 2px 10px;
+				border-radius: 12px;
+				font-size: 13px;
+				font-weight: 600;
+				background: #fef2f2;
+				color: #dc2626;
+				border: 1px solid #fca5a5;
+				margin: 2px;
+			}
+			.badge-artery {
+				display: inline-block;
+				padding: 2px 10px;
+				border-radius: 12px;
+				font-size: 13px;
+				font-weight: 600;
+				background: #eff6ff;
+				color: #2563eb;
+				border: 1px solid #93c5fd;
+			}
+
+			.heart-diagram {
+				text-align: center;
+				margin: 20px 0;
+			}
+
+			.stemi-criteria {
+				background: #fef2f2;
+				border: 2px solid #fca5a5;
+				border-radius: 10px;
+				padding: 20px;
+				margin-bottom: 30px;
+			}
+			.stemi-criteria h3 {
+				color: #dc2626;
+				margin-bottom: 15px;
+			}
+			.stemi-criteria ul {
+				list-style: none;
+				padding: 0;
+			}
+			.stemi-criteria ul li {
+				padding: 5px 0;
+				font-size: 15px;
+			}
+			.stemi-criteria ul li strong {
+				color: #991b1b;
+			}
+
+			.evolution-timeline {
+				display: flex;
+				justify-content: space-around;
+				flex-wrap: wrap;
+				margin: 20px 0;
+			}
+			.evolution-step {
+				text-align: center;
+				flex: 1;
+				min-width: 120px;
+				padding: 10px;
+			}
+			.evolution-step .step-label {
+				font-weight: 700;
+				font-size: 13px;
+				margin-top: 8px;
+				color: #333;
+			}
+			.evolution-step .step-time {
+				font-size: 11px;
+				color: #888;
+			}
+			.evolution-arrow {
+				display: flex;
+				align-items: center;
+				font-size: 24px;
+				color: #ccc;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="pre-loader">
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<img src="vendors/images/deskapp-logo.svg" alt="" />
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>
+
+		<div class="header">
+			<div class="header-left">
+				<div class="menu-icon bi bi-list"></div>
+			</div>
+			<div class="header-right">
+				<div class="user-info-dropdown">
+					<div class="dropdown">
+						<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+							<span class="user-name">ECG Dashboard</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="main-container">
+			<div class="xs-pd-20-10 pd-ltr-20">
+
+				<!-- Page Header -->
+				<div class="page-header-ecg">
+					<h1>STEMI — אוטם שריר הלב עם עליית ST</h1>
+					<p>ST-Elevation Myocardial Infarction — ציורי ECG לפי אזור, עורק אחראי, וקריטריונים</p>
+				</div>
+
+				<!-- STEMI Criteria Box -->
+				<div class="stemi-criteria">
+					<h3>קריטריונים לאבחון STEMI</h3>
+					<div class="row">
+						<div class="col-md-6">
+							<ul>
+								<li><strong>עליית ST &ge; 1mm</strong> בלפחות 2 לידים סמוכים (גפיים)</li>
+								<li><strong>עליית ST &ge; 2mm</strong> בלפחות 2 לידים סמוכים (V1-V3, גברים)</li>
+								<li><strong>עליית ST &ge; 1.5mm</strong> בלפחות 2 לידים סמוכים (V1-V3, נשים)</li>
+							</ul>
+						</div>
+						<div class="col-md-6">
+							<ul>
+								<li><strong>LBBB חדש</strong> עם כאב בחזה = שקול ל-STEMI</li>
+								<li><strong>שינויים reciprocal</strong> (ירידת ST בלידים מנוגדים) מחזקים אבחנה</li>
+								<li><strong>טיפול:</strong> PCI (צנתור) תוך 90 דקות או Fibrinolysis תוך 30 דקות</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<!-- Coronary Artery Map -->
+				<div class="card mb-4" style="border-radius:10px; overflow:hidden;">
+					<div class="card-header" style="background:#1e293b; color:#fff;">
+						<h4 class="mb-0" style="color:#fff;">מפת עורקים כליליים ואזורי הלב</h4>
+					</div>
+					<div class="card-body text-center">
+						<svg viewBox="0 0 500 350" width="450" height="315" style="max-width:100%;">
+							<!-- Heart outline -->
+							<path d="M250,300 C150,300 50,230 50,150 C50,80 100,40 160,40 C200,40 230,60 250,90 C270,60 300,40 340,40 C400,40 450,80 450,150 C450,230 350,300 250,300Z" fill="none" stroke="#e5e7eb" stroke-width="2"/>
+
+							<!-- Anterior wall -->
+							<path d="M200,100 L300,100 L320,200 L180,200Z" fill="rgba(220,38,38,0.15)" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4"/>
+							<text x="250" y="155" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">Anterior</text>
+							<text x="250" y="170" text-anchor="middle" font-size="10" fill="#dc2626">V1-V4</text>
+
+							<!-- Inferior wall -->
+							<path d="M180,210 L320,210 L290,280 L210,280Z" fill="rgba(185,28,28,0.15)" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="4"/>
+							<text x="250" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#b91c1c">Inferior</text>
+							<text x="250" y="265" text-anchor="middle" font-size="10" fill="#b91c1c">II, III, aVF</text>
+
+							<!-- Lateral wall -->
+							<path d="M330,110 L400,150 L380,230 L320,200Z" fill="rgba(153,27,27,0.15)" stroke="#991b1b" stroke-width="1.5" stroke-dasharray="4"/>
+							<text x="370" y="170" text-anchor="middle" font-size="11" font-weight="bold" fill="#991b1b">Lateral</text>
+							<text x="370" y="185" text-anchor="middle" font-size="10" fill="#991b1b">I, aVL, V5-V6</text>
+
+							<!-- Septal -->
+							<path d="M190,110 L210,110 L210,200 L190,200Z" fill="rgba(69,10,10,0.15)" stroke="#450a0a" stroke-width="1.5" stroke-dasharray="4"/>
+							<text x="130" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#450a0a">Septal</text>
+							<text x="130" y="170" text-anchor="middle" font-size="10" fill="#450a0a">V1-V2</text>
+
+							<!-- LAD -->
+							<line x1="250" y1="50" x2="250" y2="200" stroke="#dc2626" stroke-width="3"/>
+							<text x="260" y="70" font-size="11" font-weight="bold" fill="#dc2626">LAD</text>
+
+							<!-- RCA -->
+							<path d="M250,50 Q350,50 380,150 Q400,220 300,280" fill="none" stroke="#b91c1c" stroke-width="3"/>
+							<text x="400" y="130" font-size="11" font-weight="bold" fill="#b91c1c">RCA</text>
+
+							<!-- LCx -->
+							<path d="M250,50 Q150,80 130,160 Q120,210 180,250" fill="none" stroke="#991b1b" stroke-width="3"/>
+							<text x="100" y="120" font-size="11" font-weight="bold" fill="#991b1b">LCx</text>
+						</svg>
+					</div>
+				</div>
+
+				<!-- ECG Cards -->
+				<div class="row">
+
+					<!-- Normal ST for comparison -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-normal-st">
+								ST תקין — ייחוס <span class="en-name">— Normal ST Segment</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<!-- Normal ECG with isoelectric ST -->
+									<polyline fill="none" stroke="#10b981" stroke-width="2"
+										points="0,50 40,50 55,44 70,50 75,50 80,52 83,70 87,15 91,65 95,50 100,50 110,48 120,44 135,50
+										175,50 190,44 205,50 210,50 215,52 218,70 222,15 226,65 230,50 235,50 245,48 255,44 270,50
+										310,50 325,44 340,50 345,50 350,52 353,70 357,15 361,65 365,50 370,50 380,48 390,44 405,50
+										445,50 460,44 475,50 480,50 485,52 488,70 492,15 496,65 500,50 505,50 515,48 525,44 540,50 600,50" />
+									<!-- ST segment label -->
+									<line x1="95" y1="50" x2="110" y2="50" stroke="#10b981" stroke-width="3"/>
+									<text x="88" y="42" font-size="9" fill="#10b981" font-weight="bold">ST תקין</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">ST</td><td class="value-col">איזואלקטרי (על קו הבסיס), ללא עליה או ירידה</td></tr>
+									<tr><td class="label-col">T Wave</td><td class="value-col">חיובי ברוב הלידים, סימטרי</td></tr>
+									<tr><td class="label-col">משמעות</td><td class="value-col"><strong style="color:#10b981">תקין</strong> — אין עדות לאיסכמיה</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Anterior STEMI -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-anterior">
+								STEMI קדמי <span class="en-name">— Anterior STEMI (LAD)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<!-- Anterior STEMI: ST elevation with tall T waves in V1-V4 -->
+									<polyline fill="none" stroke="#dc2626" stroke-width="2.5"
+										points="0,55 35,55 45,50 55,55 60,55 65,57 68,72 72,15 76,62 80,40 85,35 95,25 110,20 125,28 135,40 140,50 145,55
+										180,55 190,50 200,55 205,55 210,57 213,72 217,15 221,62 225,40 230,35 240,25 255,20 270,28 280,40 285,50 290,55
+										325,55 335,50 345,55 350,55 355,57 358,72 362,15 366,62 370,40 375,35 385,25 400,20 415,28 425,40 430,50 435,55
+										470,55 480,50 490,55 495,55 500,57 503,72 507,15 511,62 515,40 520,35 530,25 545,20 560,28 570,40 575,50 580,55 600,55" />
+									<!-- ST elevation markers -->
+									<line x1="80" y1="55" x2="80" y2="35" stroke="#dc2626" stroke-width="1" stroke-dasharray="3"/>
+									<text x="60" y="30" font-size="9" fill="#dc2626" font-weight="bold">ST&#8593;</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">לידים</td><td class="value-col"><span class="badge-leads">V1</span><span class="badge-leads">V2</span><span class="badge-leads">V3</span><span class="badge-leads">V4</span></td></tr>
+									<tr><td class="label-col">עורק</td><td class="value-col"><span class="badge-artery">LAD — Left Anterior Descending</span></td></tr>
+									<tr><td class="label-col">Reciprocal</td><td class="value-col">ירידת ST ב-II, III, aVF</td></tr>
+									<tr><td class="label-col">סכנה</td><td class="value-col" style="color:#dc2626"><strong>גבוהה מאוד! אוטם גדול, סכנת אי-ספיקת לב</strong></td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Inferior STEMI -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-inferior">
+								STEMI תחתון <span class="en-name">— Inferior STEMI (RCA)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<!-- Inferior STEMI: ST elevation in II, III, aVF -->
+									<polyline fill="none" stroke="#b91c1c" stroke-width="2.5"
+										points="0,55 35,55 48,49 60,55 65,55 70,57 73,72 77,18 81,60 85,38 90,32 100,22 115,18 130,25 140,38 148,52 155,55
+										190,55 203,49 215,55 220,55 225,57 228,72 232,18 236,60 240,38 245,32 255,22 270,18 285,25 295,38 303,52 310,55
+										345,55 358,49 370,55 375,55 380,57 383,72 387,18 391,60 395,38 400,32 410,22 425,18 440,25 450,38 458,52 465,55
+										500,55 513,49 525,55 530,55 535,57 538,72 542,18 546,60 550,38 555,32 565,22 580,18 595,25 600,38" />
+									<text x="85" y="18" font-size="9" fill="#b91c1c" font-weight="bold">ST&#8593;</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">לידים</td><td class="value-col"><span class="badge-leads">II</span><span class="badge-leads">III</span><span class="badge-leads">aVF</span></td></tr>
+									<tr><td class="label-col">עורק</td><td class="value-col"><span class="badge-artery">RCA — Right Coronary Artery</span> (85%) / LCx (15%)</td></tr>
+									<tr><td class="label-col">Reciprocal</td><td class="value-col">ירידת ST ב-I, aVL</td></tr>
+									<tr><td class="label-col">שים לב</td><td class="value-col">בדוק V4R לאוטם חדר ימין! הימנע ממתן ניטרוגליצרין אם RV MI</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Lateral STEMI -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-lateral">
+								STEMI צדדי <span class="en-name">— Lateral STEMI (LCx)</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<!-- Lateral STEMI -->
+									<polyline fill="none" stroke="#991b1b" stroke-width="2.5"
+										points="0,55 35,55 48,49 60,55 65,55 70,57 73,72 77,18 81,60 85,38 90,33 100,24 115,20 130,26 140,38 148,52 155,55
+										190,55 203,49 215,55 220,55 225,57 228,72 232,18 236,60 240,38 245,33 255,24 270,20 285,26 295,38 303,52 310,55
+										345,55 358,49 370,55 375,55 380,57 383,72 387,18 391,60 395,38 400,33 410,24 425,20 440,26 450,38 458,52 465,55
+										500,55 513,49 525,55 530,55 535,57 538,72 542,18 546,60 550,38 555,33 565,24 580,20 595,26 600,38" />
+									<text x="85" y="18" font-size="9" fill="#991b1b" font-weight="bold">ST&#8593;</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">לידים</td><td class="value-col"><span class="badge-leads">I</span><span class="badge-leads">aVL</span><span class="badge-leads">V5</span><span class="badge-leads">V6</span></td></tr>
+									<tr><td class="label-col">עורק</td><td class="value-col"><span class="badge-artery">LCx — Left Circumflex</span></td></tr>
+									<tr><td class="label-col">Reciprocal</td><td class="value-col">ירידת ST ב-III, aVF, V1</td></tr>
+									<tr><td class="label-col">הערה</td><td class="value-col">לעתים מופיע יחד עם אוטם תחתון או קדמי</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Posterior STEMI -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-posterior">
+								STEMI אחורי <span class="en-name">— Posterior STEMI</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<!-- Posterior STEMI: ST depression in V1-V3 (mirror image) -->
+									<polyline fill="none" stroke="#7f1d1d" stroke-width="2.5"
+										points="0,45 35,45 48,40 60,45 65,45 70,47 73,62 77,10 81,58 85,45 90,48 100,55 110,62 120,65 130,62 140,55 148,48 155,45
+										190,45 203,40 215,45 220,45 225,47 228,62 232,10 236,58 240,45 245,48 255,55 265,62 275,65 285,62 295,55 303,48 310,45
+										345,45 358,40 370,45 375,45 380,47 383,62 387,10 391,58 395,45 400,48 410,55 420,62 430,65 440,62 450,55 458,48 465,45
+										500,45 513,40 525,45 530,45 535,47 538,62 542,10 546,58 550,45 555,48 565,55 575,62 585,65 595,62 600,55" />
+									<!-- ST depression marker -->
+									<line x1="85" y1="45" x2="85" y2="60" stroke="#7f1d1d" stroke-width="1" stroke-dasharray="3"/>
+									<text x="60" y="75" font-size="9" fill="#7f1d1d" font-weight="bold">ST&#8595; (mirror)</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">לידים</td><td class="value-col"><span class="badge-leads">V1-V3 (ירידת ST = תמונת מראה)</span></td></tr>
+									<tr><td class="label-col">אישור</td><td class="value-col">עליית ST ב-V7, V8, V9 (לידים אחוריים)</td></tr>
+									<tr><td class="label-col">עורק</td><td class="value-col"><span class="badge-artery">LCx</span> או <span class="badge-artery">RCA</span></td></tr>
+									<tr><td class="label-col">מלכודת</td><td class="value-col" style="color:#dc2626"><strong>קל לפספס! חפש R גבוה + ST&#8595; + T חיובי גבוה ב-V1-V3</strong></td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Septal STEMI -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-septal">
+								STEMI ספטלי <span class="en-name">— Septal STEMI</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<polyline fill="none" stroke="#450a0a" stroke-width="2.5"
+										points="0,55 35,55 48,49 60,55 65,55 70,57 73,72 77,15 81,62 85,38 90,32 100,22 115,18 128,24 138,38 148,52 155,55
+										190,55 203,49 215,55 220,55 225,57 228,72 232,15 236,62 240,38 245,32 255,22 270,18 283,24 293,38 303,52 310,55
+										345,55 358,49 370,55 375,55 380,57 383,72 387,15 391,62 395,38 400,32 410,22 425,18 438,24 448,38 458,52 465,55
+										500,55 513,49 525,55 530,55 535,57 538,72 542,15 546,62 550,38 555,32 565,22 580,18 593,24 600,38" />
+									<text x="85" y="18" font-size="9" fill="#450a0a" font-weight="bold">ST&#8593;</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">לידים</td><td class="value-col"><span class="badge-leads">V1</span><span class="badge-leads">V2</span></td></tr>
+									<tr><td class="label-col">עורק</td><td class="value-col"><span class="badge-artery">LAD — ענף ספטלי</span></td></tr>
+									<tr><td class="label-col">סיכון</td><td class="value-col">הפרעות הולכה (חסמי ענף, AV block) — הספטום מכיל את מערכת ההולכה</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- RV STEMI -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-rv">
+								STEMI חדר ימין <span class="en-name">— Right Ventricular STEMI</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<polyline fill="none" stroke="#9f1239" stroke-width="2.5"
+										points="0,55 35,55 48,49 60,55 65,55 70,57 73,72 77,18 81,60 85,38 90,33 100,23 115,19 130,25 140,38 148,52 155,55
+										190,55 203,49 215,55 220,55 225,57 228,72 232,18 236,60 240,38 245,33 255,23 270,19 285,25 295,38 303,52 310,55
+										345,55 358,49 370,55 375,55 380,57 383,72 387,18 391,60 395,38 400,33 410,23 425,19 440,25 450,38 458,52 465,55
+										500,55 513,49 525,55 530,55 535,57 538,72 542,18 546,60 550,38 555,33 565,23 580,19 595,25 600,38" />
+									<text x="85" y="16" font-size="9" fill="#9f1239" font-weight="bold">ST&#8593; V4R</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">לידים</td><td class="value-col"><span class="badge-leads">V4R</span> (ליד ימני!) + <span class="badge-leads">II</span><span class="badge-leads">III</span><span class="badge-leads">aVF</span></td></tr>
+									<tr><td class="label-col">עורק</td><td class="value-col"><span class="badge-artery">RCA — Proximal</span></td></tr>
+									<tr><td class="label-col">סימנים</td><td class="value-col">יתר לחץ ורידי צווארי, ירידת לחץ דם, ריאות נקיות</td></tr>
+									<tr><td class="label-col">זהירות</td><td class="value-col" style="color:#dc2626"><strong>אין ניטרוגליצרין! אין מורפין! נוזלים IV בלבד</strong></td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- NSTEMI for comparison -->
+					<div class="col-lg-6">
+						<div class="ecg-card card">
+							<div class="card-header-colored bg-nstemi">
+								NSTEMI / איסכמיה <span class="en-name">— NSTEMI / Ischemia</span>
+							</div>
+							<div class="ecg-svg-wrap">
+								<svg viewBox="0 0 600 100">
+									<!-- NSTEMI: ST depression + T wave inversion -->
+									<polyline fill="none" stroke="#d97706" stroke-width="2.5"
+										points="0,45 35,45 48,40 60,45 65,45 70,47 73,62 77,10 81,55 85,48 90,52 100,58 110,55 120,48 130,45
+										165,45 178,40 190,45 195,45 200,47 203,62 207,10 211,55 215,48 220,52 230,58 240,60 248,62 255,58 265,50 275,45
+										310,45 323,40 335,45 340,45 345,47 348,62 352,10 356,55 360,48 365,52 375,58 385,60 393,62 400,58 410,50 420,45
+										455,45 468,40 480,45 485,45 490,47 493,62 497,10 501,55 505,48 510,52 520,58 530,60 538,62 545,58 555,50 565,45 600,45" />
+									<!-- ST depression + T inversion markers -->
+									<line x1="85" y1="45" x2="85" y2="55" stroke="#d97706" stroke-width="1" stroke-dasharray="3"/>
+									<text x="65" y="42" font-size="9" fill="#d97706" font-weight="bold">ST&#8595;</text>
+									<text x="115" y="42" font-size="9" fill="#d97706" font-weight="bold">T&#8595;</text>
+								</svg>
+							</div>
+							<div class="ecg-info">
+								<table>
+									<tr><td class="label-col">ECG</td><td class="value-col">ירידת ST &#8805; 0.5mm ו/או היפוך גלי T</td></tr>
+									<tr><td class="label-col">הבדל</td><td class="value-col">אין עליית ST! לכן לא STEMI. חסימה חלקית של העורק</td></tr>
+									<tr><td class="label-col">אבחנה</td><td class="value-col">Troponin חיובי + שינויי ECG + קליניקה</td></tr>
+									<tr><td class="label-col">טיפול</td><td class="value-col">נוגדי קרישה, נוגדי טסיות, צנתור תוך 24-72 שעות</td></tr>
+								</table>
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<!-- end row -->
+
+				<!-- STEMI Evolution Timeline -->
+				<div class="card mt-4 mb-4" style="border-radius:10px; overflow:hidden;">
+					<div class="card-header" style="background:#1e293b; color:#fff;">
+						<h4 class="mb-0" style="color:#fff;">התפתחות STEMI בזמן — ECG Evolution</h4>
+					</div>
+					<div class="card-body">
+						<div class="row text-center">
+							<!-- Stage 1: Hyperacute T -->
+							<div class="col-md-3 col-6 mb-3">
+								<svg viewBox="0 0 150 80" width="140" height="75" style="max-width:100%;">
+									<polyline fill="none" stroke="#ef4444" stroke-width="2"
+										points="0,45 20,45 30,47 33,58 37,15 41,55 45,40 50,30 60,15 75,12 90,20 100,35 110,42 120,45 150,45"/>
+								</svg>
+								<div style="font-weight:700; font-size:14px; color:#ef4444;">T גבוהים</div>
+								<div style="font-size:12px; color:#888;">Hyperacute T waves</div>
+								<div style="font-size:11px; color:#aaa;">דקות ראשונות</div>
+							</div>
+							<!-- Stage 2: ST Elevation -->
+							<div class="col-md-3 col-6 mb-3">
+								<svg viewBox="0 0 150 80" width="140" height="75" style="max-width:100%;">
+									<polyline fill="none" stroke="#dc2626" stroke-width="2"
+										points="0,50 20,50 30,52 33,65 37,18 41,58 45,35 50,28 60,18 75,15 90,20 100,32 110,42 120,50 150,50"/>
+								</svg>
+								<div style="font-weight:700; font-size:14px; color:#dc2626;">עליית ST</div>
+								<div style="font-size:12px; color:#888;">ST Elevation</div>
+								<div style="font-size:11px; color:#aaa;">שעות ראשונות</div>
+							</div>
+							<!-- Stage 3: Q waves + ST normalizing -->
+							<div class="col-md-3 col-6 mb-3">
+								<svg viewBox="0 0 150 80" width="140" height="75" style="max-width:100%;">
+									<polyline fill="none" stroke="#b91c1c" stroke-width="2"
+										points="0,40 20,40 25,42 28,60 31,40 33,42 36,55 40,15 44,52 48,42 55,40 65,42 75,50 85,55 95,52 105,45 115,40 150,40"/>
+									<!-- Q wave label -->
+									<text x="22" y="72" font-size="8" fill="#b91c1c">Q</text>
+								</svg>
+								<div style="font-weight:700; font-size:14px; color:#b91c1c;">גלי Q + היפוך T</div>
+								<div style="font-size:12px; color:#888;">Q waves + T inversion</div>
+								<div style="font-size:11px; color:#aaa;">ימים-שבועות</div>
+							</div>
+							<!-- Stage 4: Old MI -->
+							<div class="col-md-3 col-6 mb-3">
+								<svg viewBox="0 0 150 80" width="140" height="75" style="max-width:100%;">
+									<polyline fill="none" stroke="#6b7280" stroke-width="2"
+										points="0,40 20,40 25,42 28,60 31,40 34,42 37,55 41,15 45,52 49,40 55,38 65,36 75,40 150,40"/>
+									<text x="22" y="72" font-size="8" fill="#6b7280">Q</text>
+								</svg>
+								<div style="font-weight:700; font-size:14px; color:#6b7280;">אוטם ישן</div>
+								<div style="font-size:12px; color:#888;">Old MI — Pathological Q</div>
+								<div style="font-size:11px; color:#aaa;">חודשים-קבוע</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Summary Table -->
+				<div class="card mt-4 mb-5" style="border-radius:10px; overflow:hidden;">
+					<div class="card-header" style="background:#1e293b; color:#fff;">
+						<h4 class="mb-0" style="color:#fff;">טבלה מסכמת — STEMI לפי אזור</h4>
+					</div>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover mb-0" style="text-align:right;">
+								<thead style="background:#f1f5f9;">
+									<tr>
+										<th>אזור</th>
+										<th>לידים עם ST&#8593;</th>
+										<th>עורק אחראי</th>
+										<th>Reciprocal ST&#8595;</th>
+										<th>סיבוכים</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><strong style="color:#dc2626">Anterior (קדמי)</strong></td>
+										<td>V1, V2, V3, V4</td>
+										<td>LAD</td>
+										<td>II, III, aVF</td>
+										<td>אי-ספיקת לב, מפרצת חדר, VT/VF</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#b91c1c">Inferior (תחתון)</strong></td>
+										<td>II, III, aVF</td>
+										<td>RCA (85%), LCx</td>
+										<td>I, aVL</td>
+										<td>ברדיקרדיה, AV block, RV MI</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#991b1b">Lateral (צדדי)</strong></td>
+										<td>I, aVL, V5, V6</td>
+										<td>LCx</td>
+										<td>III, aVF, V1</td>
+										<td>אי-ספיקת מיטרלית</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#7f1d1d">Posterior (אחורי)</strong></td>
+										<td>V7, V8, V9</td>
+										<td>LCx / RCA</td>
+										<td>V1-V3 (ST&#8595;, R גבוה)</td>
+										<td>קל לפספס! בדוק לידים אחוריים</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#450a0a">Septal (ספטלי)</strong></td>
+										<td>V1, V2</td>
+										<td>LAD (ענף ספטלי)</td>
+										<td>—</td>
+										<td>הפרעות הולכה, חסמי ענף</td>
+									</tr>
+									<tr>
+										<td><strong style="color:#9f1239">RV (חדר ימין)</strong></td>
+										<td>V4R + II, III, aVF</td>
+										<td>RCA (proximal)</td>
+										<td>I, aVL</td>
+										<td>יתר לחץ ורידי, היפוטנסיה. אין NTG!</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- js -->
+		<script src="vendors/scripts/core.js"></script>
+		<script src="vendors/scripts/script.min.js"></script>
+		<script src="vendors/scripts/process.js"></script>
+		<script src="vendors/scripts/layout-settings.js"></script>
+	</body>
+</html>
