@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG - תרשים אלקטרוקרדיוגרמה</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 1100px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .ecg-wrapper {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .ecg-svg-container {
+            flex: 1;
+            min-width: 0;
+        }
+        svg {
+            width: 100%;
+            height: auto;
+        }
+        .legend {
+            width: 340px;
+            flex-shrink: 0;
+        }
+        .legend-item {
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-right: 4px solid;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .legend-item:hover {
+            background: #e8f4fd;
+            transform: translateX(-3px);
+        }
+        .legend-item.active {
+            background: #e8f4fd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .legend-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+        .legend-desc {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+        .color-p { border-color: #e74c3c; }
+        .color-p .legend-title { color: #e74c3c; }
+        .color-pr { border-color: #e67e22; }
+        .color-pr .legend-title { color: #e67e22; }
+        .color-qrs { border-color: #2980b9; }
+        .color-qrs .legend-title { color: #2980b9; }
+        .color-st { border-color: #27ae60; }
+        .color-st .legend-title { color: #27ae60; }
+        .color-t { border-color: #8e44ad; }
+        .color-t .legend-title { color: #8e44ad; }
+        .color-u { border-color: #16a085; }
+        .color-u .legend-title { color: #16a085; }
+        .color-j { border-color: #d35400; }
+        .color-j .legend-title { color: #d35400; }
+        .color-qt { border-color: #c0392b; }
+        .color-qt .legend-title { color: #c0392b; }
+        .color-pri { border-color: #f39c12; }
+        .color-pri .legend-title { color: #f39c12; }
+
+        /* SVG highlight styles */
+        .ecg-highlight { opacity: 0; transition: opacity 0.3s; }
+        .ecg-highlight.show { opacity: 0.15; }
+        .ecg-label { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+
+        @media (max-width: 900px) {
+            .ecg-wrapper { flex-direction: column; }
+            .legend { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>מרכיבי אלקטרוקרדיוגרמה (ECG) תקינה</h1>
+        <div class="ecg-wrapper">
+            <div class="legend">
+                <div class="legend-item color-p" data-part="p">
+                    <div class="legend-title">גל P - דה-פולריזציה פרוזדורית</div>
+                    <div class="legend-desc">מייצג את הפעילות החשמלית של התכווצות הפרוזדורים (העליות). גל חיובי קטן ומעוגל.</div>
+                </div>
+                <div class="legend-item color-pri" data-part="pri">
+                    <div class="legend-title">מקטע PR</div>
+                    <div class="legend-desc">הזמן שלוקח לדחף לעבור דרך צומת ה-AV, צרור היס, ענפי הצרור ורשת פורקינייה.</div>
+                </div>
+                <div class="legend-item color-pr" data-part="pr">
+                    <div class="legend-title">מרווח PR</div>
+                    <div class="legend-desc">מתחילת גל P ועד תחילת קומפלקס QRS. כולל דה-פולריזציה פרוזדורית ומעבר במערכת ההולכה. (0.12-0.20 שניות)</div>
+                </div>
+                <div class="legend-item color-qrs" data-part="qrs">
+                    <div class="legend-title">קומפלקס QRS - דה-פולריזציה חדרית</div>
+                    <div class="legend-desc">מייצג את הפעילות החשמלית של התכווצות החדרים. כולל גלי Q, R ו-S. (0.06-0.10 שניות)</div>
+                </div>
+                <div class="legend-item color-j" data-part="j">
+                    <div class="legend-title">נקודת J</div>
+                    <div class="legend-desc">נקודת המפגש בין סוף קומפלקס QRS לתחילת מקטע ST.</div>
+                </div>
+                <div class="legend-item color-st" data-part="st">
+                    <div class="legend-title">מקטע ST</div>
+                    <div class="legend-desc">מייצג רה-פולריזציה חדרית מוקדמת. שינויים במקטע זה יכולים להעיד על אוטם שריר הלב.</div>
+                </div>
+                <div class="legend-item color-t" data-part="t">
+                    <div class="legend-title">גל T - רה-פולריזציה חדרית</div>
+                    <div class="legend-desc">מייצג את ההתאוששות החשמלית של החדרים לאחר ההתכווצות.</div>
+                </div>
+                <div class="legend-item color-u" data-part="u">
+                    <div class="legend-title">גל U - רה-פולריזציה חדרית מאוחרת</div>
+                    <div class="legend-desc">גל קטן שמופיע לעיתים אחרי גל T. מייצג רה-פולריזציה מאוחרת של שריר הלב.</div>
+                </div>
+                <div class="legend-item color-qt" data-part="qt">
+                    <div class="legend-title">מרווח QT</div>
+                    <div class="legend-desc">הזמן הכולל לדה-פולריזציה ורה-פולריזציה חדרית. נמדד מתחילת QRS ועד סוף גל T.</div>
+                </div>
+            </div>
+            <div class="ecg-svg-container">
+                <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Grid background -->
+                    <defs>
+                        <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#fce4e4" stroke-width="0.5"/>
+                        </pattern>
+                        <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <rect width="50" height="50" fill="url(#smallGrid)"/>
+                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f5c6c6" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="700" height="420" fill="url(#grid)" rx="8"/>
+
+                    <!-- Highlight regions (hidden by default) -->
+                    <rect class="ecg-highlight" id="hl-p" x="60" y="120" width="80" height="160" fill="#e74c3c" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-pri" x="110" y="120" width="60" height="160" fill="#f39c12" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-pr" x="60" y="280" width="140" height="40" fill="#e67e22" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-qrs" x="170" y="80" width="110" height="240" fill="#2980b9" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-j" x="270" y="220" width="20" height="60" fill="#d35400" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-st" x="280" y="120" width="80" height="160" fill="#27ae60" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-t" x="360" y="120" width="120" height="160" fill="#8e44ad" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-u" x="490" y="160" width="80" height="120" fill="#16a085" rx="4"/>
+                    <rect class="ecg-highlight" id="hl-qt" x="170" y="330" width="310" height="40" fill="#c0392b" rx="4"/>
+
+                    <!-- ECG Waveform -->
+                    <path d="
+                        M 20,250
+                        L 60,250
+                        C 70,250 75,210 90,200
+                        C 105,190 115,210 130,230
+                        C 135,235 140,250 170,250
+                        L 190,250
+                        L 195,260
+                        L 200,270
+                        L 210,100
+                        L 225,80
+                        L 235,90
+                        L 250,300
+                        L 260,310
+                        L 275,250
+                        L 290,250
+                        L 360,250
+                        C 370,250 380,230 400,190
+                        C 420,150 430,160 440,180
+                        C 450,200 460,230 480,250
+                        L 500,250
+                        C 510,250 515,240 525,235
+                        C 535,230 540,235 545,240
+                        C 550,245 555,250 570,250
+                        L 680,250
+                    " fill="none" stroke="#1a73e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <!-- Labels with lines -->
+                    <!-- P wave label -->
+                    <line x1="95" y1="190" x2="95" y2="155" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+                    <text x="95" y="148" text-anchor="middle" class="ecg-label" fill="#e74c3c" font-size="14" font-weight="bold">P</text>
+
+                    <!-- PR segment -->
+                    <line x1="135" y1="250" x2="135" y2="290" stroke="#f39c12" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="170" y1="250" x2="170" y2="290" stroke="#f39c12" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="135" y1="285" x2="170" y2="285" stroke="#f39c12" stroke-width="1.5" marker-start="url(#arrowLeft)" marker-end="url(#arrowRight)"/>
+                    <text x="152" y="300" text-anchor="middle" class="ecg-label" fill="#f39c12" font-size="10" font-weight="bold">PR מקטע</text>
+
+                    <!-- PR interval -->
+                    <line x1="65" y1="315" x2="65" y2="335" stroke="#e67e22" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="195" y1="315" x2="195" y2="335" stroke="#e67e22" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="65" y1="330" x2="195" y2="330" stroke="#e67e22" stroke-width="1.5"/>
+                    <text x="130" y="348" text-anchor="middle" class="ecg-label" fill="#e67e22" font-size="11" font-weight="bold">PR מרווח</text>
+
+                    <!-- Q wave -->
+                    <text x="198" y="282" text-anchor="middle" class="ecg-label" fill="#2980b9" font-size="12" font-weight="bold">Q</text>
+
+                    <!-- R wave label -->
+                    <text x="225" y="70" text-anchor="middle" class="ecg-label" fill="#2980b9" font-size="16" font-weight="bold">R</text>
+
+                    <!-- S wave -->
+                    <text x="258" y="330" text-anchor="middle" class="ecg-label" fill="#2980b9" font-size="12" font-weight="bold">S</text>
+
+                    <!-- QRS complex bracket -->
+                    <line x1="195" y1="355" x2="195" y2="370" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="275" y1="355" x2="275" y2="370" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="195" y1="365" x2="275" y2="365" stroke="#2980b9" stroke-width="1.5"/>
+                    <text x="235" y="383" text-anchor="middle" class="ecg-label" fill="#2980b9" font-size="11" font-weight="bold">QRS קומפלקס</text>
+
+                    <!-- J point -->
+                    <line x1="275" y1="250" x2="285" y2="240" stroke="#d35400" stroke-width="1.5"/>
+                    <text x="298" y="235" text-anchor="middle" class="ecg-label" fill="#d35400" font-size="11" font-weight="bold">J נקודת</text>
+
+                    <!-- ST segment -->
+                    <line x1="290" y1="250" x2="290" y2="155" stroke="#27ae60" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="360" y1="250" x2="360" y2="155" stroke="#27ae60" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="290" y1="160" x2="360" y2="160" stroke="#27ae60" stroke-width="1.5"/>
+                    <text x="325" y="152" text-anchor="middle" class="ecg-label" fill="#27ae60" font-size="12" font-weight="bold">ST מקטע</text>
+
+                    <!-- T wave label -->
+                    <line x1="420" y1="180" x2="420" y2="140" stroke="#8e44ad" stroke-width="1.5" stroke-dasharray="3,2"/>
+                    <text x="420" y="132" text-anchor="middle" class="ecg-label" fill="#8e44ad" font-size="14" font-weight="bold">T</text>
+
+                    <!-- U wave label -->
+                    <line x1="535" y1="232" x2="535" y2="200" stroke="#16a085" stroke-width="1.5" stroke-dasharray="3,2"/>
+                    <text x="535" y="193" text-anchor="middle" class="ecg-label" fill="#16a085" font-size="14" font-weight="bold">U</text>
+
+                    <!-- QT interval -->
+                    <line x1="195" y1="393" x2="195" y2="410" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="480" y1="393" x2="480" y2="410" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2"/>
+                    <line x1="195" y1="405" x2="480" y2="405" stroke="#c0392b" stroke-width="1.5"/>
+                    <text x="337" y="418" text-anchor="middle" class="ecg-label" fill="#c0392b" font-size="11" font-weight="bold">QT מרווח</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const part = item.dataset.part;
+                const hl = document.getElementById('hl-' + part);
+                if (hl) hl.classList.add('show');
+                item.classList.add('active');
+            });
+            item.addEventListener('mouseleave', () => {
+                const part = item.dataset.part;
+                const hl = document.getElementById('hl-' + part);
+                if (hl) hl.classList.remove('show');
+                item.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
