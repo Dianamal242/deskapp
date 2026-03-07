@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ההולכה החשמלית של הלב וה-ECG</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #2c3e50;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(231,76,60,0.4);
+            margin-bottom: 8px;
+        }
+        .page-header p {
+            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 300;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section cards */
+        .section-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            margin-bottom: 35px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 22px 35px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .section-header .number {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 20px; color: #fff;
+            flex-shrink: 0;
+        }
+        .section-header h2 {
+            font-size: 22px; font-weight: 700;
+        }
+        .section-header .subtitle {
+            font-size: 13px; color: #888; font-weight: 400;
+        }
+        .section-body {
+            padding: 0 35px 35px;
+        }
+
+        /* Conduction section */
+        .conduction-header { background: linear-gradient(135deg, #e74c3c10, #c0392b08); border-bottom: 3px solid #e74c3c; }
+        .conduction-header .number { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .conduction-header h2 { color: #c0392b; }
+
+        .conduction-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .conduction-svg-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+        .conduction-svg-wrap svg { width: 100%; height: auto; }
+
+        .conduction-steps {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        .step {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            transition: all 0.25s;
+            cursor: default;
+            border-right: 4px solid transparent;
+        }
+        .step:hover {
+            background: #fef9f9;
+            transform: translateX(-4px);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+        .step-num {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; color: #fff;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .step-text h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .step-text p { font-size: 12px; color: #666; line-height: 1.6; }
+
+        .step-sa { border-right-color: #2ecc71; }
+        .step-sa .step-num { background: #2ecc71; }
+        .step-sa h4 { color: #27ae60; }
+
+        .step-av { border-right-color: #f39c12; }
+        .step-av .step-num { background: #f39c12; }
+        .step-av h4 { color: #e67e22; }
+
+        .step-his { border-right-color: #e67e22; }
+        .step-his .step-num { background: #e67e22; }
+        .step-his h4 { color: #d35400; }
+
+        .step-bb { border-right-color: #3498db; }
+        .step-bb .step-num { background: #3498db; }
+        .step-bb h4 { color: #2980b9; }
+
+        .step-pk { border-right-color: #9b59b6; }
+        .step-pk .step-num { background: #9b59b6; }
+        .step-pk h4 { color: #8e44ad; }
+
+        /* Connector between sections */
+        .connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -18px 0;
+            position: relative;
+            z-index: 2;
+        }
+        .connector-arrow {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #e74c3c, #3498db);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .connector-arrow svg { width: 24px; height: 24px; }
+
+        /* ECG section */
+        .ecg-header { background: linear-gradient(135deg, #3498db10, #2980b908); border-bottom: 3px solid #3498db; }
+        .ecg-header .number { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .ecg-header h2 { color: #2980b9; }
+
+        .ecg-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .ecg-svg-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+        .ecg-svg-wrap svg { width: 100%; height: auto; }
+
+        .ecg-legend {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        .ecg-item {
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            border-radius: 10px;
+            border-right: 4px solid;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .ecg-item:hover {
+            background: #e8f4fd;
+            transform: translateX(-4px);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+        .ecg-item.active {
+            background: #e8f4fd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .ecg-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .ecg-item p { font-size: 12px; color: #555; line-height: 1.5; }
+
+        .ei-p { border-color: #e74c3c; } .ei-p h4 { color: #e74c3c; }
+        .ei-pr { border-color: #e67e22; } .ei-pr h4 { color: #e67e22; }
+        .ei-qrs { border-color: #2980b9; } .ei-qrs h4 { color: #2980b9; }
+        .ei-j { border-color: #d35400; } .ei-j h4 { color: #d35400; }
+        .ei-st { border-color: #27ae60; } .ei-st h4 { color: #27ae60; }
+        .ei-t { border-color: #8e44ad; } .ei-t h4 { color: #8e44ad; }
+        .ei-u { border-color: #16a085; } .ei-u h4 { color: #16a085; }
+        .ei-qt { border-color: #c0392b; } .ei-qt h4 { color: #c0392b; }
+
+        .ecg-highlight { opacity: 0; transition: opacity 0.3s; }
+        .ecg-highlight.show { opacity: 0.15; }
+
+        /* Flow summary */
+        .flow-bar {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 16px;
+            padding: 24px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+        }
+        .flow-node {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .flow-node .dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .flow-arrow {
+            color: rgba(255,255,255,0.4);
+            font-size: 18px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255,255,255,0.35);
+            font-size: 12px;
+        }
+
+        /* Print styles */
+        @media print {
+            body { background: #fff; padding: 10px; }
+            .section-card { box-shadow: none; border: 1px solid #ddd; }
+            .page-header h1 { color: #2c3e50; text-shadow: none; }
+            .page-header p { color: #888; }
+            .flow-bar { background: #f8f9fa; border: 1px solid #ddd; }
+            .flow-bar, .flow-node { color: #2c3e50; }
+        }
+
+        @media (max-width: 900px) {
+            .conduction-layout, .ecg-layout { flex-direction: column; }
+            .conduction-steps, .ecg-legend { width: 100%; }
+            .page-header h1 { font-size: 26px; }
+            .section-body { padding: 0 20px 20px; }
+            .section-header { padding: 18px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>מערכת ההולכה החשמלית של הלב</h1>
+    <p>תרשים אנטומי ואלקטרוקרדיוגרמה (ECG) - מדריך מקצועי</p>
+</div>
+
+<div class="main-container">
+
+    <!-- SECTION 1: Conduction System -->
+    <div class="section-card">
+        <div class="section-header conduction-header">
+            <div class="number">1</div>
+            <div>
+                <h2>מבנה מערכת ההולכה</h2>
+                <div class="subtitle">Cardiac Conduction System</div>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="conduction-layout">
+                <div class="conduction-steps">
+                    <div class="step step-sa">
+                        <div class="step-num">1</div>
+                        <div class="step-text">
+                            <h4>צומת סינוס-אטריאלי (SA Node)</h4>
+                            <p>קוצב הלב הטבעי. ממוקם בעלייה הימנית. יוצר דחפים חשמליים בקצב של 60-100 פעימות לדקה.</p>
+                        </div>
+                    </div>
+                    <div class="step step-av">
+                        <div class="step-num">2</div>
+                        <div class="step-text">
+                            <h4>צומת אטריו-ונטריקולרי (AV Node)</h4>
+                            <p>משהה את הדחף כ-0.1 שנייה כדי לאפשר לפרוזדורים להתרוקן לפני התכווצות החדרים. קצב עצמי: 40-60 פעימות/דקה.</p>
+                        </div>
+                    </div>
+                    <div class="step step-his">
+                        <div class="step-num">3</div>
+                        <div class="step-text">
+                            <h4>צרור היס (Bundle of His)</h4>
+                            <p>מוליך את הדחף מהפרוזדורים לחדרים דרך המחיצה הבין-חדרית. נקודת המעבר היחידה בין עליות לחדרים.</p>
+                        </div>
+                    </div>
+                    <div class="step step-bb">
+                        <div class="step-num">4</div>
+                        <div class="step-text">
+                            <h4>ענפי הצרור (Bundle Branches)</h4>
+                            <p>צרור היס מתפצל לענף ימני ושמאלי. הענף השמאלי מתפצל שוב לענף קדמי ואחורי.</p>
+                        </div>
+                    </div>
+                    <div class="step step-pk">
+                        <div class="step-num">5</div>
+                        <div class="step-text">
+                            <h4>סיבי פורקינייה (Purkinje Fibers)</h4>
+                            <p>רשת סיבים דקים שמפיצים את הדחף במהירות גבוהה לכל שריר החדרים. קצב עצמי: 20-40 פעימות/דקה.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="conduction-svg-wrap">
+                    <svg viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:0.12"/>
+                                <stop offset="100%" style="stop-color:#c0392b;stop-opacity:0.06"/>
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="b"/>
+                                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <filter id="shadow">
+                                <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.15"/>
+                            </filter>
+                            <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                <polygon points="0 0,8 3,0 6" fill="#27ae60"/>
+                            </marker>
+                            <marker id="ay" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                <polygon points="0 0,8 3,0 6" fill="#e67e22"/>
+                            </marker>
+                            <!-- Animated pulse -->
+                            <radialGradient id="pulse">
+                                <stop offset="0%" stop-color="#2ecc71" stop-opacity="0.6"/>
+                                <stop offset="100%" stop-color="#2ecc71" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+
+                        <!-- Heart shape -->
+                        <path d="M 300 640
+                            C 300 640, 80 480, 80 290
+                            C 80 190, 145 110, 225 110
+                            C 265 110, 285 135, 300 160
+                            C 315 135, 335 110, 375 110
+                            C 455 110, 520 190, 520 290
+                            C 520 480, 300 640, 300 640 Z"
+                            fill="url(#hg)" stroke="#e74c3c" stroke-width="2.5" opacity="0.9"/>
+
+                        <!-- Septum -->
+                        <line x1="300" y1="175" x2="300" y2="560" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.3"/>
+
+                        <!-- AV valve line -->
+                        <line x1="130" y1="330" x2="470" y2="330" stroke="#c0392b" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.25"/>
+
+                        <!-- Chamber labels -->
+                        <text x="210" y="250" text-anchor="middle" font-family="Heebo,sans-serif" font-size="12" fill="#c0392b" opacity="0.45">עלייה שמאלית</text>
+                        <text x="390" y="250" text-anchor="middle" font-family="Heebo,sans-serif" font-size="12" fill="#c0392b" opacity="0.45">עלייה ימנית</text>
+                        <text x="210" y="460" text-anchor="middle" font-family="Heebo,sans-serif" font-size="12" fill="#c0392b" opacity="0.45">חדר שמאלי</text>
+                        <text x="390" y="460" text-anchor="middle" font-family="Heebo,sans-serif" font-size="12" fill="#c0392b" opacity="0.45">חדר ימני</text>
+
+                        <!-- SA Node with pulse animation -->
+                        <circle cx="395" cy="160" r="22" fill="url(#pulse)" opacity="0.6">
+                            <animate attributeName="r" values="22;35;22" dur="1.5s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.6;0;0.6" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="395" cy="160" r="18" fill="#2ecc71" stroke="#27ae60" stroke-width="2.5" filter="url(#glow)"/>
+                        <text x="395" y="165" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" font-weight="700" fill="#fff">SA</text>
+
+                        <!-- SA label -->
+                        <rect x="435" y="135" width="140" height="40" rx="8" fill="white" stroke="#2ecc71" stroke-width="1.5" filter="url(#shadow)"/>
+                        <text x="505" y="153" text-anchor="middle" font-family="Heebo,sans-serif" font-size="11" font-weight="700" fill="#27ae60">צומת SA</text>
+                        <text x="505" y="168" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" fill="#888">60-100 פעימות/דקה</text>
+                        <line x1="413" y1="158" x2="435" y2="155" stroke="#2ecc71" stroke-width="1"/>
+
+                        <!-- Internodal pathways (SA -> AV) -->
+                        <path d="M 395 178 C 390 210, 360 250, 320 285" stroke="#2ecc71" stroke-width="2.5" fill="none" stroke-dasharray="5,3" marker-end="url(#ag)" opacity="0.7">
+                            <animate attributeName="stroke-dashoffset" values="0;-16" dur="1s" repeatCount="indefinite"/>
+                        </path>
+                        <!-- Atrial spread -->
+                        <path d="M 395 178 C 370 200, 280 220, 210 215" stroke="#2ecc71" stroke-width="1.5" fill="none" stroke-dasharray="3,3" opacity="0.35">
+                            <animate attributeName="stroke-dashoffset" values="0;-12" dur="1.2s" repeatCount="indefinite"/>
+                        </path>
+
+                        <text x="420" y="240" font-family="Heebo,sans-serif" font-size="10" fill="#27ae60" opacity="0.7">מסלולים</text>
+                        <text x="420" y="252" font-family="Heebo,sans-serif" font-size="10" fill="#27ae60" opacity="0.7">בין-צומתיים</text>
+
+                        <!-- AV Node -->
+                        <circle cx="315" cy="300" r="16" fill="#f39c12" stroke="#e67e22" stroke-width="2.5" filter="url(#glow)"/>
+                        <text x="315" y="305" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" font-weight="700" fill="#fff">AV</text>
+
+                        <rect x="120" y="278" width="130" height="40" rx="8" fill="white" stroke="#f39c12" stroke-width="1.5" filter="url(#shadow)"/>
+                        <text x="185" y="296" text-anchor="middle" font-family="Heebo,sans-serif" font-size="11" font-weight="700" fill="#e67e22">צומת AV</text>
+                        <text x="185" y="311" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" fill="#888">השהיה - 40-60 פ/ד</text>
+                        <line x1="299" y1="298" x2="250" y2="298" stroke="#f39c12" stroke-width="1"/>
+
+                        <!-- Bundle of His -->
+                        <path d="M 315 316 L 300 365" stroke="#e67e22" stroke-width="3" fill="none" marker-end="url(#ay)">
+                            <animate attributeName="stroke-dashoffset" values="0;-10" dur="0.8s" repeatCount="indefinite"/>
+                        </path>
+
+                        <rect x="275" y="365" width="50" height="24" rx="10" fill="#e67e22" stroke="#d35400" stroke-width="1.5" filter="url(#glow)"/>
+                        <text x="300" y="381" text-anchor="middle" font-family="Heebo,sans-serif" font-size="9" font-weight="700" fill="#fff">היס</text>
+
+                        <rect x="370" y="358" width="120" height="34" rx="8" fill="white" stroke="#e67e22" stroke-width="1.5" filter="url(#shadow)"/>
+                        <text x="430" y="375" text-anchor="middle" font-family="Heebo,sans-serif" font-size="11" font-weight="700" fill="#d35400">צרור היס</text>
+                        <text x="430" y="388" text-anchor="middle" font-family="Heebo,sans-serif" font-size="9" fill="#888">Bundle of His</text>
+                        <line x1="325" y1="377" x2="370" y2="375" stroke="#e67e22" stroke-width="1"/>
+
+                        <!-- Left Bundle Branch -->
+                        <path d="M 290 389 C 270 420, 240 450, 215 500" stroke="#3498db" stroke-width="3" fill="none"/>
+                        <!-- Right Bundle Branch -->
+                        <path d="M 310 389 C 330 420, 360 450, 385 500" stroke="#9b59b6" stroke-width="3" fill="none"/>
+
+                        <!-- Left bundle label -->
+                        <rect x="100" y="410" width="115" height="30" rx="6" fill="white" stroke="#3498db" stroke-width="1.5" filter="url(#shadow)"/>
+                        <text x="157" y="430" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" font-weight="700" fill="#2980b9">ענף שמאלי</text>
+                        <line x1="215" y1="425" x2="258" y2="430" stroke="#3498db" stroke-width="1"/>
+
+                        <!-- Right bundle label -->
+                        <rect x="390" y="410" width="115" height="30" rx="6" fill="white" stroke="#9b59b6" stroke-width="1.5" filter="url(#shadow)"/>
+                        <text x="447" y="430" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" font-weight="700" fill="#8e44ad">ענף ימני</text>
+                        <line x1="390" y1="425" x2="350" y2="430" stroke="#9b59b6" stroke-width="1"/>
+
+                        <!-- Purkinje - Left -->
+                        <path d="M 215 500 C 200 520, 175 535, 160 555" stroke="#3498db" stroke-width="1.5" fill="none"/>
+                        <path d="M 215 500 C 210 525, 200 545, 195 565" stroke="#3498db" stroke-width="1.5" fill="none"/>
+                        <path d="M 215 500 C 215 530, 220 555, 225 575" stroke="#3498db" stroke-width="1.5" fill="none"/>
+                        <path d="M 215 500 C 225 525, 240 545, 255 560" stroke="#3498db" stroke-width="1.5" fill="none"/>
+                        <path d="M 215 500 C 230 515, 260 530, 275 540" stroke="#3498db" stroke-width="1.5" fill="none"/>
+                        <circle cx="160" cy="555" r="3" fill="#3498db" opacity="0.7"/>
+                        <circle cx="195" cy="565" r="3" fill="#3498db" opacity="0.7"/>
+                        <circle cx="225" cy="575" r="3" fill="#3498db" opacity="0.7"/>
+                        <circle cx="255" cy="560" r="3" fill="#3498db" opacity="0.7"/>
+                        <circle cx="275" cy="540" r="3" fill="#3498db" opacity="0.7"/>
+
+                        <!-- Purkinje - Right -->
+                        <path d="M 385 500 C 400 520, 425 535, 440 555" stroke="#9b59b6" stroke-width="1.5" fill="none"/>
+                        <path d="M 385 500 C 390 525, 400 545, 405 565" stroke="#9b59b6" stroke-width="1.5" fill="none"/>
+                        <path d="M 385 500 C 385 530, 380 555, 375 575" stroke="#9b59b6" stroke-width="1.5" fill="none"/>
+                        <path d="M 385 500 C 375 525, 360 545, 345 560" stroke="#9b59b6" stroke-width="1.5" fill="none"/>
+                        <path d="M 385 500 C 370 515, 340 530, 325 540" stroke="#9b59b6" stroke-width="1.5" fill="none"/>
+                        <circle cx="440" cy="555" r="3" fill="#9b59b6" opacity="0.7"/>
+                        <circle cx="405" cy="565" r="3" fill="#9b59b6" opacity="0.7"/>
+                        <circle cx="375" cy="575" r="3" fill="#9b59b6" opacity="0.7"/>
+                        <circle cx="345" cy="560" r="3" fill="#9b59b6" opacity="0.7"/>
+                        <circle cx="325" cy="540" r="3" fill="#9b59b6" opacity="0.7"/>
+
+                        <!-- Purkinje label -->
+                        <rect x="100" y="545" width="110" height="35" rx="6" fill="white" stroke="#1abc9c" stroke-width="1.5" filter="url(#shadow)"/>
+                        <text x="155" y="560" text-anchor="middle" font-family="Heebo,sans-serif" font-size="10" font-weight="700" fill="#1abc9c">סיבי פורקינייה</text>
+                        <text x="155" y="574" text-anchor="middle" font-family="Heebo,sans-serif" font-size="9" fill="#888">20-40 פ/ד</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connector arrow -->
+    <div class="connector">
+        <div class="connector-arrow">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+    </div>
+
+    <!-- SECTION 2: ECG -->
+    <div class="section-card">
+        <div class="section-header ecg-header">
+            <div class="number">2</div>
+            <div>
+                <h2>תרשים אלקטרוקרדיוגרמה (ECG)</h2>
+                <div class="subtitle">Normal ECG Waveform Components</div>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="ecg-layout">
+                <div class="ecg-legend">
+                    <div class="ecg-item ei-p" data-part="p">
+                        <h4>גל P - דה-פולריזציה פרוזדורית</h4>
+                        <p>הפעילות החשמלית של התכווצות הפרוזדורים. גל חיובי, קטן ומעוגל.</p>
+                    </div>
+                    <div class="ecg-item ei-pr" data-part="pr">
+                        <h4>מרווח PR (0.12-0.20 שנ')</h4>
+                        <p>מתחילת גל P ועד תחילת QRS. כולל דה-פולריזציה פרוזדורית ומעבר דרך צומת ה-AV.</p>
+                    </div>
+                    <div class="ecg-item ei-qrs" data-part="qrs">
+                        <h4>קומפלקס QRS (0.06-0.10 שנ')</h4>
+                        <p>דה-פולריזציה חדרית. כולל גל Q (שלילי ראשון), גל R (חיובי), וגל S (שלילי שני).</p>
+                    </div>
+                    <div class="ecg-item ei-j" data-part="j">
+                        <h4>נקודת J</h4>
+                        <p>נקודת המפגש בין סוף QRS לתחילת מקטע ST.</p>
+                    </div>
+                    <div class="ecg-item ei-st" data-part="st">
+                        <h4>מקטע ST</h4>
+                        <p>רה-פולריזציה חדרית מוקדמת. שינויים כאן מעידים על איסכמיה או אוטם.</p>
+                    </div>
+                    <div class="ecg-item ei-t" data-part="t">
+                        <h4>גל T - רה-פולריזציה חדרית</h4>
+                        <p>התאוששות חשמלית של החדרים לאחר ההתכווצות.</p>
+                    </div>
+                    <div class="ecg-item ei-u" data-part="u">
+                        <h4>גל U</h4>
+                        <p>גל קטן שמופיע לעיתים אחרי גל T. רה-פולריזציה מאוחרת.</p>
+                    </div>
+                    <div class="ecg-item ei-qt" data-part="qt">
+                        <h4>מרווח QT</h4>
+                        <p>הזמן הכולל לדה-פולריזציה ורה-פולריזציה חדרית.</p>
+                    </div>
+                </div>
+                <div class="ecg-svg-wrap">
+                    <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="sg" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#fce4e4" stroke-width="0.5"/>
+                            </pattern>
+                            <pattern id="lg" width="50" height="50" patternUnits="userSpaceOnUse">
+                                <rect width="50" height="50" fill="url(#sg)"/>
+                                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f5c6c6" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="700" height="420" fill="url(#lg)" rx="8"/>
+
+                        <!-- Highlights -->
+                        <rect class="ecg-highlight" id="hl-p" x="60" y="120" width="80" height="160" fill="#e74c3c" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-pr" x="60" y="280" width="140" height="50" fill="#e67e22" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-qrs" x="170" y="50" width="110" height="280" fill="#2980b9" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-j" x="270" y="220" width="20" height="60" fill="#d35400" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-st" x="280" y="120" width="80" height="160" fill="#27ae60" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-t" x="360" y="120" width="120" height="160" fill="#8e44ad" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-u" x="490" y="160" width="80" height="120" fill="#16a085" rx="4"/>
+                        <rect class="ecg-highlight" id="hl-qt" x="170" y="330" width="310" height="40" fill="#c0392b" rx="4"/>
+
+                        <!-- ECG waveform -->
+                        <path d="
+                            M 20,250 L 60,250
+                            C 70,250 75,210 90,200 C 105,190 115,210 130,230 C 135,235 140,250 170,250
+                            L 190,250 L 195,260 L 200,270
+                            L 210,100 L 225,80 L 235,90
+                            L 250,300 L 260,310 L 275,250
+                            L 290,250 L 360,250
+                            C 370,250 380,230 400,190 C 420,150 430,160 440,180 C 450,200 460,230 480,250
+                            L 500,250
+                            C 510,250 515,240 525,235 C 535,230 540,235 545,240 C 550,245 555,250 570,250
+                            L 680,250
+                        " fill="none" stroke="#1a73e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                        <!-- Labels -->
+                        <line x1="95" y1="190" x2="95" y2="155" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        <text x="95" y="148" text-anchor="middle" font-family="Heebo,sans-serif" fill="#e74c3c" font-size="15" font-weight="700">P</text>
+
+                        <!-- PR interval -->
+                        <line x1="65" y1="315" x2="65" y2="340" stroke="#e67e22" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="195" y1="315" x2="195" y2="340" stroke="#e67e22" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="65" y1="335" x2="195" y2="335" stroke="#e67e22" stroke-width="1.5"/>
+                        <text x="130" y="352" text-anchor="middle" font-family="Heebo,sans-serif" fill="#e67e22" font-size="11" font-weight="700">מרווח PR</text>
+
+                        <!-- Q -->
+                        <text x="198" y="282" text-anchor="middle" font-family="Heebo,sans-serif" fill="#2980b9" font-size="13" font-weight="700">Q</text>
+                        <!-- R -->
+                        <text x="225" y="70" text-anchor="middle" font-family="Heebo,sans-serif" fill="#2980b9" font-size="17" font-weight="700">R</text>
+                        <!-- S -->
+                        <text x="258" y="330" text-anchor="middle" font-family="Heebo,sans-serif" fill="#2980b9" font-size="13" font-weight="700">S</text>
+
+                        <!-- QRS bracket -->
+                        <line x1="195" y1="360" x2="195" y2="375" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="275" y1="360" x2="275" y2="375" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="195" y1="370" x2="275" y2="370" stroke="#2980b9" stroke-width="1.5"/>
+                        <text x="235" y="388" text-anchor="middle" font-family="Heebo,sans-serif" fill="#2980b9" font-size="11" font-weight="700">קומפלקס QRS</text>
+
+                        <!-- J point -->
+                        <line x1="275" y1="250" x2="285" y2="238" stroke="#d35400" stroke-width="1.5"/>
+                        <text x="298" y="232" text-anchor="middle" font-family="Heebo,sans-serif" fill="#d35400" font-size="11" font-weight="700">נקודת J</text>
+
+                        <!-- ST segment -->
+                        <line x1="290" y1="250" x2="290" y2="155" stroke="#27ae60" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="360" y1="250" x2="360" y2="155" stroke="#27ae60" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="290" y1="160" x2="360" y2="160" stroke="#27ae60" stroke-width="1.5"/>
+                        <text x="325" y="150" text-anchor="middle" font-family="Heebo,sans-serif" fill="#27ae60" font-size="12" font-weight="700">מקטע ST</text>
+
+                        <!-- T wave -->
+                        <line x1="420" y1="180" x2="420" y2="140" stroke="#8e44ad" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        <text x="420" y="130" text-anchor="middle" font-family="Heebo,sans-serif" fill="#8e44ad" font-size="15" font-weight="700">T</text>
+
+                        <!-- U wave -->
+                        <line x1="535" y1="232" x2="535" y2="200" stroke="#16a085" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        <text x="535" y="192" text-anchor="middle" font-family="Heebo,sans-serif" fill="#16a085" font-size="15" font-weight="700">U</text>
+
+                        <!-- QT interval -->
+                        <line x1="195" y1="395" x2="195" y2="412" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="480" y1="395" x2="480" y2="412" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2"/>
+                        <line x1="195" y1="408" x2="480" y2="408" stroke="#c0392b" stroke-width="1.5"/>
+                        <text x="337" y="418" text-anchor="middle" font-family="Heebo,sans-serif" fill="#c0392b" font-size="11" font-weight="700">מרווח QT</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flow summary bar -->
+    <div class="flow-bar">
+        <div class="flow-node"><div class="dot" style="background:#2ecc71"></div>צומת SA</div>
+        <div class="flow-arrow">&larr;</div>
+        <div class="flow-node"><div class="dot" style="background:#f39c12"></div>צומת AV</div>
+        <div class="flow-arrow">&larr;</div>
+        <div class="flow-node"><div class="dot" style="background:#e67e22"></div>צרור היס</div>
+        <div class="flow-arrow">&larr;</div>
+        <div class="flow-node"><div class="dot" style="background:#3498db"></div>ענפי הצרור</div>
+        <div class="flow-arrow">&larr;</div>
+        <div class="flow-node"><div class="dot" style="background:#9b59b6"></div>סיבי פורקינייה</div>
+        <div class="flow-arrow">&larr;</div>
+        <div class="flow-node"><div class="dot" style="background:#e74c3c"></div>התכווצות הלב</div>
+    </div>
+
+    <div class="footer">
+        <p>תרשים לימודי בלבד - אינו מהווה תחליף לייעוץ רפואי מקצועי</p>
+    </div>
+
+</div>
+
+<script>
+    // ECG interactive highlights
+    document.querySelectorAll('.ecg-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            const hl = document.getElementById('hl-' + item.dataset.part);
+            if (hl) hl.classList.add('show');
+            item.classList.add('active');
+        });
+        item.addEventListener('mouseleave', () => {
+            const hl = document.getElementById('hl-' + item.dataset.part);
+            if (hl) hl.classList.remove('show');
+            item.classList.remove('active');
+        });
+    });
+</script>
+</body>
+</html>
